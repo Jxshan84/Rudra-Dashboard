@@ -1,86 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nexora Dashboard</title>
-<link rel="stylesheet" href="style.css">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nexora Dashboard</title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/style.css" />
+
+  <!-- Font Awesome (icons) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"/>
 </head>
 
 <body>
 
-<nav>
-<div class="logo">👑 Nexora</div>
+  <!-- HEADER -->
+  <header>
+    <div class="logo">
+      <h2>👑 Nexora</h2>
+    </div>
 
-<div class="nav-links">
-<a href="#">Home</a>
-<a href="#">Dashboard</a>
-<a href="#">Premium</a>
-<a href="#">Support</a>
-</div>
-</nav>
+    <nav>
+      <a href="#home">Home</a>
+      <a href="#features">Features</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
 
-<section class="hero">
+  <!-- HERO SECTION -->
+  <section id="home" class="hero">
+    <h1>Welcome to Nexora Dashboard</h1>
+    <p>Your powerful Discord bot control panel</p>
+    <button onclick="startBot()">Start Bot</button>
+  </section>
 
-<h1>👑 Nexora Discord Bot</h1>
+  <!-- FEATURES -->
+  <section id="features" class="features">
+    <h2>Features</h2>
 
-<p>The Ultimate Discord Moderation, Economy, Music & AI Bot</p>
+    <div class="box-container">
+      <div class="box">
+        <i class="fa-solid fa-shield"></i>
+        <h3>Security</h3>
+        <p>Advanced moderation system</p>
+      </div>
 
-<div class="buttons">
+      <div class="box">
+        <i class="fa-solid fa-music"></i>
+        <h3>Music</h3>
+        <p>High quality music system</p>
+      </div>
 
-<a href="https://discord.com/oauth2/authorize?client_id=1522565395129569360&permissions=8&integration_type=0&scope=bot+applications.commands" class="btn">
-🤖 Invite Bot
-</a>
+      <div class="box">
+        <i class="fa-solid fa-robot"></i>
+        <h3>AI Chat</h3>
+        <p>Smart auto replies</p>
+      </div>
+    </div>
+  </section>
 
-<a href="#" class="btn">
-💬 Support Server
-</a>
+  <!-- ABOUT -->
+  <section id="about" class="about">
+    <h2>About</h2>
+    <p>
+      Nexora is a powerful Discord bot dashboard designed for automation,
+      moderation, and fun commands.
+    </p>
+  </section>
 
-<a href="#" class="btn">
-🔐 Login with Discord
-</a>
+  <!-- CONTACT -->
+  <section id="contact" class="contact">
+    <h2>Contact</h2>
+    <p>Email: support@nexora.com</p>
+  </section>
 
-</div>
+  <!-- FOOTER -->
+  <footer>
+    <p>© 2026 Nexora. All rights reserved.</p>
+  </footer>
 
-</section>
+  <!-- JS -->
+  <script src="js/script.js"></script>
 
-<section class="stats">
-
-<div class="card">
-<h2>🤖 80+</h2>
-<p>Commands</p>
-</div>
-
-<div class="card">
-<h2>⚡ 24/7</h2>
-<p>Online</p>
-</div>
-
-<div class="card">
-<h2>🛡️ Premium</h2>
-<p>Security</p>
-</div>
-
-<div class="card">
-<h2>💎 Free</h2>
-<p>Setup</p>
-</div>
-
-</section>
-
-<section class="features">
-
-<div class="feature">
-<h2>🛡️ Moderation</h2>
-<p>Kick, Ban, Mute, Warn, Purge and much more.</p>
-</div>
-
-<div class="feature">
-<h2>💰 Economy</h2>
-<p>Daily, Work, Rob, Shop, Blackjack & Inventory.</p>
-</div>
-
-<div class="feature">
-<h2>🎵 Music</h2>
-<p>Play high quality music with
+</body>
+</html>
