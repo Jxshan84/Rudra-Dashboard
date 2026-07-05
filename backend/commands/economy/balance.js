@@ -1,7 +1,5 @@
-Balance.js 
-
 const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
-const User = require("../models/User");
+const User = require("../../models/User");
 
 module.exports = {
   data: new SlashCommandBuilder()
