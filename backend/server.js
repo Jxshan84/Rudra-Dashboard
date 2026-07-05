@@ -18,7 +18,7 @@ const client = new Client({
   ]
 });
 
-// MongoDB Connection
+// MongoDB
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log("✅ MongoDB Connected"))
   .catch(err => console.error("❌ MongoDB Error:", err));
@@ -42,19 +42,46 @@ app.get("/health", (req, res) => {
   });
 });
 
-// Discord Ready
+// Bot Ready
 client.once("ready", async () => {
   console.log(`✅ Logged in as ${client.user.tag}`);
 
   commandHandler(client);
 
-  console.log("✅ Command Handler Loaded");
+  console.log(`✅ Loaded ${client.commands.size} commands.`);
+});
+
+// Slash Command Handler
+client.on("interactionCreate", async (interaction) => {
+  if (!interaction.isChatInputCommand()) return;
+
+  const command = client.commands.get(interaction.commandName);
+
+  if (!command) return;
+
+  try {
+    await command.execute(interaction);
+  } catch (error) {
+    console.error(error);
+
+    if (interaction.replied || interaction.deferred) {
+      await interaction.followUp({
+        content: "❌ There was an error while executing this command.",
+        ephemeral: true
+      });
+    } else {
+      await interaction.reply({
+        content: "❌ There was an error while executing this command.",
+        ephemeral: true
+      });
+    }
+  }
 });
 
 // Login
 client.login(process.env.TOKEN);
 
-// Server Start
+// Start Server
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
