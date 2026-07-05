@@ -3,9 +3,16 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
-const { Client, GatewayIntentBits } = require("discord.js");
+const fs = require("fs");
+const path = require("path");
 
-const commandHandler = require("./handlers/commandHandler");
+const {
+  Client,
+  GatewayIntentBits,
+  Collection,
+  REST,
+  Routes
+} = require("discord.js");
 
 const app = express();
 
@@ -13,22 +20,47 @@ app.use(cors());
 app.use(express.json());
 
 const client = new Client({
-  intents: [
-    GatewayIntentBits.Guilds
-  ]
+  intents: [GatewayIntentBits.Guilds]
 });
+
+client.commands = new Collection();
+
+// Load Commands
+const commands = [];
+const commandsPath = path.join(__dirname, "commands");
+
+if (fs.existsSync(commandsPath)) {
+  const folders = fs.readdirSync(commandsPath);
+
+  for (const folder of folders) {
+    const folderPath = path.join(commandsPath, folder);
+
+    if (!fs.lstatSync(folderPath).isDirectory()) continue;
+
+    const files = fs.readdirSync(folderPath).filter(f => f.endsWith(".js"));
+
+    for (const file of files) {
+      const command = require(path.join(folderPath, file));
+
+      if (!command.data || !command.execute) continue;
+
+      client.commands.set(command.data.name, command);
+      commands.push(command.data.toJSON());
+    }
+  }
+}
 
 // MongoDB
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log("✅ MongoDB Connected"))
   .catch(err => console.error("❌ MongoDB Error:", err));
 
-// Home Route
+// Home
 app.get("/", (req, res) => {
   res.send("👑 Rudra Backend Running");
 });
 
-// Health API
+// Health
 app.get("/health", (req, res) => {
   res.json({
     status: client.isReady() ? "Online" : "Offline",
@@ -36,23 +68,32 @@ app.get("/health", (req, res) => {
     ping: client.ws.ping,
     servers: client.guilds.cache.size,
     users: client.guilds.cache.reduce(
-      (total, guild) => total + (guild.memberCount || 0),
+      (a, g) => a + (g.memberCount || 0),
       0
     )
   });
 });
 
-// Bot Ready
-client.once("ready", async () => {
+// Ready
+client.once("clientReady", async () => {
   console.log(`✅ Logged in as ${client.user.tag}`);
 
-  commandHandler(client);
+  const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);
 
-  console.log(`✅ Loaded ${client.commands.size} commands.`);
+  try {
+    await rest.put(
+      Routes.applicationCommands(process.env.CLIENT_ID),
+      { body: commands }
+    );
+
+    console.log(`✅ Registered ${commands.length} slash commands.`);
+  } catch (err) {
+    console.error(err);
+  }
 });
 
-// Slash Command Handler
-client.on("interactionCreate", async (interaction) => {
+// Slash Commands
+client.on("interactionCreate", async interaction => {
   if (!interaction.isChatInputCommand()) return;
 
   const command = client.commands.get(interaction.commandName);
@@ -61,17 +102,17 @@ client.on("interactionCreate", async (interaction) => {
 
   try {
     await command.execute(interaction);
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    console.error(err);
 
     if (interaction.replied || interaction.deferred) {
       await interaction.followUp({
-        content: "❌ There was an error while executing this command.",
+        content: "❌ Command Error",
         ephemeral: true
       });
     } else {
       await interaction.reply({
-        content: "❌ There was an error while executing this command.",
+        content: "❌ Command Error",
         ephemeral: true
       });
     }
