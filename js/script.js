@@ -92,3 +92,29 @@ document.querySelectorAll("a").forEach(anchor => {
     });
 
 });
+async function loadStatus() {
+
+    try {
+
+        const res = await fetch("http://localhost:3000/health");
+
+        const data = await res.json();
+
+        const status = document.querySelector(".status-card h3");
+        const text = document.querySelector(".status-card p");
+
+        status.textContent = "🟢 " + data.status;
+
+        text.textContent = "Bot: " + data.bot;
+
+    } catch (err) {
+
+        console.error(err);
+
+    }
+
+}
+
+loadStatus();
+
+setInterval(loadStatus, 5000);
