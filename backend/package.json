@@ -13,5 +13,8 @@
     "express": "^4.21.2",
     "cors": "^2.8.5",
     "mongoose": "^8.15.1"
+    "express-session": "^1.18.0",
+"passport": "^0.7.0",
+"passport-discord": "^0.1.4"
   }
 }
