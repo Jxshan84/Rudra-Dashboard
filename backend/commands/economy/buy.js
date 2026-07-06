@@ -9,7 +9,7 @@ const ShopItem = require("../../models/ShopItem");
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("buy")
-    .setDescription("Buy an item from the shop")
+    .setDescription("Buy an item from the global shop")
     .addStringOption(option =>
       option
         .setName("item")
@@ -22,8 +22,8 @@ module.exports = {
     const itemName = interaction.options.getString("item");
 
     const item = await ShopItem.findOne({
-      guildId: interaction.guild.id,
-      name: itemName
+      name: itemName,
+      enabled: true
     });
 
     if (!item) {
@@ -80,14 +80,21 @@ module.exports = {
         break;
     }
 
-    user.inventory.push(item.name);
+    if (!user.inventory.includes(item.name)) {
+      user.inventory.push(item.name);
+    }
+
+    if (item.stock > 0) {
+      item.stock--;
+    }
 
     if (item.roleId) {
       const member = await interaction.guild.members.fetch(interaction.user.id);
-      await member.roles.add(item.roleId);
+      await member.roles.add(item.roleId).catch(() => {});
     }
 
     await user.save();
+    await item.save();
 
     const embed = new EmbedBuilder()
       .setColor("Green")
@@ -101,6 +108,11 @@ module.exports = {
         {
           name: "Price",
           value: `${item.price} ${item.currency}`,
+          inline: true
+        },
+        {
+          name: "Remaining Stock",
+          value: item.stock === -1 ? "Unlimited" : `${item.stock}`,
           inline: true
         }
       )
