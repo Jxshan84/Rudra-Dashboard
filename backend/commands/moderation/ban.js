@@ -70,6 +70,17 @@ module.exports = {
 
     await interaction.reply({
       embeds: [embed]
+   const settings = await GuildSettings.findOne({
+  guildId: interaction.guild.id
+});
+
+if (settings && settings.modLogChannel) {
+  const logChannel = interaction.guild.channels.cache.get(settings.modLogChannel);
+
+  if (logChannel) {
+    await logChannel.send({ embeds: [embed] });
+  }
+}
     });
   }
 };
