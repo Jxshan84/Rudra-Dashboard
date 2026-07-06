@@ -1,7 +1,6 @@
 const mongoose = require("mongoose");
 
 const guildSettingsSchema = new mongoose.Schema({
-
   guildId: {
     type: String,
     required: true,
@@ -11,6 +10,11 @@ const guildSettingsSchema = new mongoose.Schema({
   prefix: {
     type: String,
     default: "/"
+  },
+
+  isPremium: {
+    type: Boolean,
+    default: false
   },
 
   modLogChannel: {
@@ -71,8 +75,17 @@ const guildSettingsSchema = new mongoose.Schema({
   antiRaid: {
     type: Boolean,
     default: false
-  }
+  },
 
+  autoRespondEnabled: {
+    type: Boolean,
+    default: true
+  },
+
+  autoReactEnabled: {
+    type: Boolean,
+    default: true
+  }
 }, {
   timestamps: true
 });
