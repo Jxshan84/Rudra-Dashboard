@@ -9,142 +9,78 @@ const RedeemCode = require("../../models/RedeemCode");
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("redeem")
-    .setDescription("Redeem a code")
-    .addStringOption(option =>
-      option
-        .setName("code")
-        .setDescription("Redeem Code")
-        .setRequired(true)
+    .setDescription("Redeem a server code")
+    .addStringOption(o =>
+      o.setName("code").setDescription("Redeem code").setRequired(true)
     ),
 
   async execute(interaction) {
-
-    const codeInput = interaction.options
-      .getString("code")
-      .toUpperCase();
+    const guildId = interaction.guild.id;
+    const codeInput = interaction.options.getString("code").toUpperCase();
 
     const redeemCode = await RedeemCode.findOne({
+      guildId,
       code: codeInput
     });
 
     if (!redeemCode) {
-      return interaction.reply({
-        content: "❌ Invalid redeem code.",
-        ephemeral: true
-      });
+      return interaction.reply({ content: "❌ Invalid code for this server.", ephemeral: true });
     }
 
-    if (
-      redeemCode.expiresAt &&
-      new Date() > redeemCode.expiresAt
-    ) {
-      return interaction.reply({
-        content: "❌ This redeem code has expired.",
-        ephemeral: true
-      });
+    if (redeemCode.expiresAt && new Date() > redeemCode.expiresAt) {
+      return interaction.reply({ content: "❌ This code has expired.", ephemeral: true });
     }
 
     if (redeemCode.used >= redeemCode.uses) {
-      return interaction.reply({
-        content: "❌ This redeem code has reached its usage limit.",
-        ephemeral: true
-      });
+      return interaction.reply({ content: "❌ This code reached its usage limit.", ephemeral: true });
     }
 
-    let user = await User.findOne({
-      userId: interaction.user.id
-    });
+    const redeemedCount = redeemCode.redeemedBy.filter(id => id === interaction.user.id).length;
 
-    if (!user) {
-      user = await User.create({
-        userId: interaction.user.id
-      });
+    if (redeemedCount >= redeemCode.maxRedeemPerUser) {
+      return interaction.reply({ content: "❌ You already redeemed this code.", ephemeral: true });
     }
 
-    const alreadyRedeemed =
-      redeemCode.redeemedBy.filter(
-        id => id === interaction.user.id
-      ).length;
+    let user = await User.findOne({ userId: interaction.user.id });
+    if (!user) user = await User.create({ userId: interaction.user.id });
 
-    if (
-      alreadyRedeemed >=
-      redeemCode.maxRedeemPerUser
-    ) {
-      return interaction.reply({
-        content:
-          "❌ You have already redeemed this code the maximum number of times.",
-        ephemeral: true
-      });
+    if (redeemCode.rewardType === "coins") user.coins += redeemCode.amount;
+    if (redeemCode.rewardType === "gems") user.gems += redeemCode.amount;
+    if (redeemCode.rewardType === "premiumgems") user.premiumGems += redeemCode.amount;
+    if (redeemCode.rewardType === "xp") user.xp += redeemCode.amount;
+
+    if (redeemCode.rewardType === "item") {
+      user.inventory.push(redeemCode.itemName);
     }
 
-    switch (redeemCode.rewardType) {
-
-      case "coins":
-        user.coins += redeemCode.amount;
-        break;
-
-      case "gems":
-        user.gems += redeemCode.amount;
-        break;
-
-      case "premiumgems":
-        user.premiumGems += redeemCode.amount;
-        break;
-
-      case "xp":
-        user.xp += redeemCode.amount;
-        break;
-
-      case "role":
-        if (redeemCode.roleId) {
-          const member = await interaction.guild.members.fetch(interaction.user.id);
-          await member.roles.add(redeemCode.roleId);
-        }
-        break;
-
-      case "item":
-        user.inventory.push(redeemCode.itemName);
-        break;
-
+    if (redeemCode.rewardType === "role") {
+      const member = await interaction.guild.members.fetch(interaction.user.id);
+      await member.roles.add(redeemCode.roleId).catch(() => null);
     }
 
-    redeemCode.used++;
+    redeemCode.used += 1;
+    redeemCode.redeemedBy.push(interaction.user.id);
 
-    redeemCode.redeemedBy.push(
-      interaction.user.id
-    );
-
-    await redeemCode.save();
     await user.save();
+    await redeemCode.save();
+
+    const rewardText =
+      redeemCode.rewardType === "role"
+        ? `<@&${redeemCode.roleId}>`
+        : redeemCode.rewardType === "item"
+        ? redeemCode.itemName
+        : `${redeemCode.amount}`;
 
     const embed = new EmbedBuilder()
       .setColor("Green")
-      .setTitle("🎉 Redeem Successful")
-      .setDescription(
-        `Successfully redeemed **${redeemCode.code}**`
-      )
+      .setTitle("🎉 Code Redeemed")
+      .setDescription(`Successfully redeemed **${redeemCode.code}**`)
       .addFields(
-        {
-          name: "Reward",
-          value: redeemCode.rewardType,
-          inline: true
-        },
-        {
-          name: "Amount",
-          value:
-            redeemCode.rewardType === "role"
-              ? "<@&" + redeemCode.roleId + ">"
-              : redeemCode.rewardType === "item"
-              ? redeemCode.itemName
-              : String(redeemCode.amount),
-          inline: true
-        }
+        { name: "Reward Type", value: redeemCode.rewardType, inline: true },
+        { name: "Reward", value: rewardText, inline: true }
       )
       .setTimestamp();
 
-    await interaction.reply({
-      embeds: [embed]
-    });
-
+    await interaction.reply({ embeds: [embed] });
   }
 };
