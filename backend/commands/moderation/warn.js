@@ -24,4 +24,4 @@ const warnSchema = new mongoose.Schema({
   timestamps: true
 });
 
-module.exports = mongoose.models.warn || mongoose.model("warn", userSchema);
+module.exports = mongoose.models.Warn || mongoose.model("Warn", userSchema);
