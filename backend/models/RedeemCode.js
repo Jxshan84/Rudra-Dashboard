@@ -8,9 +8,25 @@ const redeemCodeSchema = new mongoose.Schema({
     uppercase: true
   },
 
-  reward: {
+  rewardType: {
+    type: String,
+    required: true,
+    enum: ["coins", "gems", "premiumgems", "xp", "item", "role"]
+  },
+
+  amount: {
     type: Number,
-    required: true
+    default: 0
+  },
+
+  itemName: {
+    type: String,
+    default: null
+  },
+
+  roleId: {
+    type: String,
+    default: null
   },
 
   uses: {
@@ -23,9 +39,19 @@ const redeemCodeSchema = new mongoose.Schema({
     default: 0
   },
 
+  maxRedeemPerUser: {
+    type: Number,
+    default: 1
+  },
+
+  redeemedBy: {
+    type: Array,
+    default: []
+  },
+
   expiresAt: {
     type: Date,
-    required: true
+    default: null
   },
 
   createdBy: {
@@ -37,4 +63,6 @@ const redeemCodeSchema = new mongoose.Schema({
   timestamps: true
 });
 
-module.exports = mongoose.models.RedeemCode || mongoose.model("RedeemCode", redeemCodeSchema);
+module.exports =
+  mongoose.models.RedeemCode ||
+  mongoose.model("RedeemCode", redeemCodeSchema);
