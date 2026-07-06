@@ -1,58 +1,150 @@
-const mongoose = require("mongoose");
+const {
+  SlashCommandBuilder,
+  EmbedBuilder
+} = require("discord.js");
 
-const userSchema = new mongoose.Schema({
-  userId: {
-    type: String,
-    required: true,
-    unique: true
-  },
+const User = require("../../models/User");
+const RedeemCode = require("../../models/RedeemCode");
 
-  coins: {
-    type: Number,
-    default: 0
-  },
+module.exports = {
+  data: new SlashCommandBuilder()
+    .setName("redeem")
+    .setDescription("Redeem a code")
+    .addStringOption(option =>
+      option
+        .setName("code")
+        .setDescription("Redeem Code")
+        .setRequired(true)
+    ),
 
-  bank: {
-    type: Number,
-    default: 0
-  },
+  async execute(interaction) {
 
-  gems: {
-    type: Number,
-    default: 0
-  },
+    const codeInput = interaction.options
+      .getString("code")
+      .toUpperCase();
 
-  premiumGems: {
-    type: Number,
-    default: 0
-  },
+    const redeemCode = await RedeemCode.findOne({
+      code: codeInput
+    });
 
-  isCurrencyManager: {
-    type: Boolean,
-    default: false
-  },
+    if (!redeemCode) {
+      return interaction.reply({
+        content: "❌ Invalid redeem code.",
+        ephemeral: true
+      });
+    }
 
-  xp: {
-    type: Number,
-    default: 0
-  },
+    if (
+      redeemCode.expiresAt &&
+      new Date() > redeemCode.expiresAt
+    ) {
+      return interaction.reply({
+        content: "❌ This redeem code has expired.",
+        ephemeral: true
+      });
+    }
 
-  level: {
-    type: Number,
-    default: 1
-  },
+    if (redeemCode.used >= redeemCode.uses) {
+      return interaction.reply({
+        content: "❌ This redeem code has reached its usage limit.",
+        ephemeral: true
+      });
+    }
 
-  inventory: {
-    type: Array,
-    default: []
-  },
+    let user = await User.findOne({
+      userId: interaction.user.id
+    });
 
-  lastDaily: {
-    type: Number,
-    default: 0
+    if (!user) {
+      user = await User.create({
+        userId: interaction.user.id
+      });
+    }
+
+    const alreadyRedeemed =
+      redeemCode.redeemedBy.filter(
+        id => id === interaction.user.id
+      ).length;
+
+    if (
+      alreadyRedeemed >=
+      redeemCode.maxRedeemPerUser
+    ) {
+      return interaction.reply({
+        content:
+          "❌ You have already redeemed this code the maximum number of times.",
+        ephemeral: true
+      });
+    }
+
+    switch (redeemCode.rewardType) {
+
+      case "coins":
+        user.coins += redeemCode.amount;
+        break;
+
+      case "gems":
+        user.gems += redeemCode.amount;
+        break;
+
+      case "premiumgems":
+        user.premiumGems += redeemCode.amount;
+        break;
+
+      case "xp":
+        user.xp += redeemCode.amount;
+        break;
+
+      case "role":
+        if (redeemCode.roleId) {
+          const member = await interaction.guild.members.fetch(interaction.user.id);
+          await member.roles.add(redeemCode.roleId);
+        }
+        break;
+
+      case "item":
+        user.inventory.push(redeemCode.itemName);
+        break;
+
+    }
+
+    redeemCode.used++;
+
+    redeemCode.redeemedBy.push(
+      interaction.user.id
+    );
+
+    await redeemCode.save();
+    await user.save();
+
+    const embed = new EmbedBuilder()
+      .setColor("Green")
+      .setTitle("🎉 Redeem Successful")
+      .setDescription(
+        `Successfully redeemed **${redeemCode.code}**`
+      )
+      .addFields(
+        {
+          name: "Reward",
+          value: redeemCode.rewardType,
+          inline: true
+        },
+        {
+          name: "Amount",
+          value:
+            redeemCode.rewardType === "role"
+              ? "<@&" + redeemCode.roleId + ">"
+              : redeemCode.rewardType === "item"
+              ? redeemCode.itemName
+              : String(redeemCode.amount),
+          inline: true
+        }
+      )
+      .setTimestamp();
+
+    await interaction.reply({
+      embeds: [embed]
+    });
+
   }
-}, {
-  timestamps: true
-});
-
-module.exports = mongoose.models.User || mongoose.model("User", userSchema);
+};
