@@ -4,10 +4,17 @@
   "description": "RUDRA Discord Bot Backend",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "dev": "node server.js"
   },
+  "keywords": [
+    "discord",
+    "discord-bot",
+    "rudra",
+    "dashboard"
+  ],
   "author": "RUDRA",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "cors": "^2.8.5",
     "discord.js": "^14.22.1",
