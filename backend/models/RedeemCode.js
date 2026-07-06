@@ -37,4 +37,4 @@ const redeemCodeSchema = new mongoose.Schema({
   timestamps: true
 });
 
-module.exports = mongoose.model("RedeemCode", redeemCodeSchema);
+module.exports = mongoose.models.RedeemCode || mongoose.model("RedeemCode", redeemCodeSchema);
