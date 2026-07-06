@@ -1,3 +1,17 @@
+async function requireLogin() {
+  try {
+    const res = await fetch("/api/user", { credentials: "include" });
+
+    if (res.status === 401) {
+      window.location.href = "/auth/discord";
+      return;
+    }
+  } catch (err) {
+    window.location.href = "/auth/discord";
+  }
+}
+
+requireLogin();
 const API = "https://nexora-dashboard-klgw.onrender.com/health";
 
 async function loadDashboard() {
