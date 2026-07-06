@@ -41,7 +41,14 @@ const userSchema = new mongoose.Schema({
     type: Number,
     default: 0
   }
-
+  premiumGems: {
+  type: Number,
+  default: 0
+},
+isCurrencyManager: {
+  type: Boolean,
+  default: false
+}
 }, {
   timestamps: true
 });
