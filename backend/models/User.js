@@ -6,30 +6,42 @@ const userSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
+
   coins: {
     type: Number,
     default: 0
   },
+
   bank: {
     type: Number,
     default: 0
   },
+
   gems: {
     type: Number,
     default: 0
   },
+
   xp: {
     type: Number,
     default: 0
   },
+
   level: {
     type: Number,
     default: 1
   },
+
   inventory: {
     type: Array,
     default: []
+  },
+
+  lastDaily: {
+    type: Number,
+    default: 0
   }
+
 }, {
   timestamps: true
 });
