@@ -1,9 +1,13 @@
 const mongoose = require("mongoose");
 
 const redeemCodeSchema = new mongoose.Schema({
+  guildId: {
+    type: String,
+    required: true
+  },
+
   code: {
     type: String,
-    unique: true,
     required: true,
     uppercase: true
   },
@@ -58,10 +62,11 @@ const redeemCodeSchema = new mongoose.Schema({
     type: String,
     required: true
   }
-
 }, {
   timestamps: true
 });
+
+redeemCodeSchema.index({ guildId: 1, code: 1 }, { unique: true });
 
 module.exports =
   mongoose.models.RedeemCode ||
