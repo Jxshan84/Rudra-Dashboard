@@ -1,42 +1,58 @@
-const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
-const ShopItem = require("../../models/ShopItem");
+const mongoose = require("mongoose");
 
-module.exports = {
-  data: new SlashCommandBuilder()
-    .setName("shop")
-    .setDescription("View server shop items"),
+const shopItemSchema = new mongoose.Schema({
 
-  async execute(interaction) {
-    const items = await ShopItem.find({
-      guildId: interaction.guild.id
-    });
+  name: {
+    type: String,
+    required: true,
+    unique: true
+  },
 
-    if (!items.length) {
-      return interaction.reply({
-        content: "🛒 Shop is empty.",
-        ephemeral: true
-      });
-    }
+  description: {
+    type: String,
+    default: "No description"
+  },
 
-    const list = items
-      .map((item, index) => {
-        const currencyIcon =
-          item.currency === "coins" ? "🪙" :
-          item.currency === "gems" ? "💎" :
-          "👑";
+  price: {
+    type: Number,
+    required: true
+  },
 
-        return `**${index + 1}. ${item.name}**\n${item.description}\nPrice: **${item.price} ${currencyIcon} ${item.currency}**`;
-      })
-      .join("\n\n");
+  currency: {
+    type: String,
+    enum: ["coins", "gems", "premiumGems"],
+    default: "coins"
+  },
 
-    const embed = new EmbedBuilder()
-      .setColor("Blue")
-      .setTitle("🛒 Server Shop")
-      .setDescription(list)
-      .setTimestamp();
+  roleId: {
+    type: String,
+    default: null
+  },
 
-    await interaction.reply({
-      embeds: [embed]
-    });
+  image: {
+    type: String,
+    default: null
+  },
+
+  stock: {
+    type: Number,
+    default: -1
+  },
+
+  category: {
+    type: String,
+    default: "General"
+  },
+
+  enabled: {
+    type: Boolean,
+    default: true
   }
-};
+
+}, {
+  timestamps: true
+});
+
+module.exports =
+  mongoose.models.ShopItem ||
+  mongoose.model("ShopItem", shopItemSchema);
