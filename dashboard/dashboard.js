@@ -1,4 +1,5 @@
-const API = "/api/dashboard/stats";
+const BACKEND = "https://nexora-dashboard-klgw.onrender.com";
+const API = `${BACKEND}/api/dashboard/stats`;
 
 function setText(id, value) {
   const el = document.getElementById(id);
@@ -39,100 +40,159 @@ async function loadDashboard() {
   } catch (err) {
     setText("status", "🔴 Offline");
     setText("database", "Error");
-    console.error(err);
+    console.error("Dashboard Error:", err);
   }
 }
 
 async function loadUser() {
-  const res = await fetch("/api/user", { credentials: "include" });
+  try {
+    const res = await fetch(`${BACKEND}/api/user`, {
+      credentials: "include"
+    });
 
-  if (res.status === 401) {
-    window.location.href = "/auth/discord";
+    if (res.status === 401) {
+      window.location.href = `${BACKEND}/auth/discord`;
+      return false;
+    }
+
+    const user = await res.json();
+
+    if (user.loggedIn) {
+      document.querySelector(".profile span").textContent = user.username;
+
+      if (user.avatar) {
+        document.querySelector(".profile img").src =
+          `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`;
+      }
+    }
+
+    return true;
+  } catch (err) {
+    console.error("User Error:", err);
     return false;
   }
-
-  const user = await res.json();
-
-  if (user.loggedIn) {
-    document.querySelector(".profile span").textContent = user.username;
-
-    if (user.avatar) {
-      document.querySelector(".profile img").src =
-        `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`;
-    }
-  }
-
-  return true;
 }
 
 async function loadServers() {
-  const res = await fetch("/api/guilds", { credentials: "include" });
-  const guilds = await res.json();
+  try {
+    const res = await fetch(`${BACKEND}/api/guilds`, {
+      credentials: "include"
+    });
 
-  const select = document.getElementById("serverSelect");
-  if (!select) return;
+    const guilds = await res.json();
 
-  select.innerHTML = "";
+    const select = document.getElementById("serverSelect");
+    if (!select) return;
 
-  if (!Array.isArray(guilds) || guilds.length === 0) {
-    select.innerHTML = `<option value="">No servers found</option>`;
-    return;
+    select.innerHTML = "";
+
+    if (!Array.isArray(guilds) || guilds.length === 0) {
+      select.innerHTML = `<option value="">No servers found</option>`;
+      return;
+    }
+
+    guilds.forEach(guild => {
+      const option = document.createElement("option");
+      option.value = guild.id;
+      option.textContent = guild.name;
+      select.appendChild(option);
+    });
+
+    let saved = localStorage.getItem("selectedGuild");
+
+    if (!saved || !guilds.some(g => g.id === saved)) {
+      saved = guilds[0].id;
+      localStorage.setItem("selectedGuild", saved);
+    }
+
+    select.value = saved;
+
+    await loadGuildStats(saved);
+    await loadGuildSettings(saved);
+    await loadGuildChannels(saved);
+
+  } catch (err) {
+    console.error("Server Load Error:", err);
   }
-
-  guilds.forEach(guild => {
-    const option = document.createElement("option");
-    option.value = guild.id;
-    option.textContent = guild.name;
-    select.appendChild(option);
-  });
-
-  let saved = localStorage.getItem("selectedGuild");
-
-  if (!saved || !guilds.some(g => g.id === saved)) {
-    saved = guilds[0].id;
-    localStorage.setItem("selectedGuild", saved);
-  }
-
-  select.value = saved;
-
-  await loadGuildStats(saved);
-  await loadGuildSettings(saved);
 }
 
 async function loadGuildStats(guildId) {
   if (!guildId) return;
 
-  const res = await fetch(`/api/guild/${guildId}/stats`);
-  const data = await res.json();
+  try {
+    const res = await fetch(`${BACKEND}/api/guild/${guildId}/stats`);
+    const data = await res.json();
 
-  if (!data.success) return;
+    if (!data.success) return;
 
-  setText("guildName", data.guild.name);
-  setText("guildMembers", data.guild.members);
-  setText("guildChannels", data.guild.channels);
-  setText("guildRoles", data.guild.roles);
+    setText("guildName", data.guild.name);
+    setText("guildMembers", data.guild.members);
+    setText("guildChannels", data.guild.channels);
+    setText("guildRoles", data.guild.roles);
+  } catch (err) {
+    console.error("Guild Stats Error:", err);
+  }
+}
+
+async function loadGuildChannels(guildId) {
+  if (!guildId) return;
+
+  try {
+    const res = await fetch(`${BACKEND}/api/guild/${guildId}/channels`);
+    const data = await res.json();
+
+    if (!data.success) return;
+
+    fillChannelSelect("welcomeChannel", data.channels);
+    fillChannelSelect("leaveChannel", data.channels);
+    fillChannelSelect("modLogChannel", data.channels);
+    fillChannelSelect("gemsLogChannel", data.channels);
+  } catch (err) {
+    console.error("Channel Load Error:", err);
+  }
+}
+
+function fillChannelSelect(id, channels) {
+  const select = document.getElementById(id);
+  if (!select) return;
+
+  const current = select.value;
+  select.innerHTML = `<option value="">Select channel</option>`;
+
+  channels.forEach(channel => {
+    const option = document.createElement("option");
+    option.value = channel.id;
+    option.textContent = `#${channel.name}`;
+    select.appendChild(option);
+  });
+
+  if (current) select.value = current;
 }
 
 async function loadGuildSettings(guildId) {
   if (!guildId) return;
 
-  const res = await fetch(`/api/guild/${guildId}`);
-  const data = await res.json();
+  try {
+    const res = await fetch(`${BACKEND}/api/guild/${guildId}`);
+    const data = await res.json();
 
-  if (!data.success) return;
+    if (!data.success) return;
 
-  const s = data.settings;
+    const s = data.settings;
 
-  setValue("prefix", s.prefix || "/");
-  setValue("welcomeChannel", s.welcomeChannel || "");
-  setValue("leaveChannel", s.leaveChannel || "");
-  setValue("autoRole", s.autoRole || "");
-  setValue("modLogChannel", s.modLogChannel || "");
-  setValue("gemsLogChannel", s.gemsLogChannel || "");
-  setValue("ticketCategory", s.ticketCategory || "");
-  setValue("automod", String(s.automod || false));
-  setValue("antiLink", String(s.antiLink || false));
-  setValue("isPremium", String(s.isPremium || false));
+    setValue("prefix", s.prefix || "/");
+    setValue("welcomeChannel", s.welcomeChannel || "");
+    setValue("leaveChannel", s.leaveChannel || "");
+    setValue("autoRole", s.autoRole || "");
+    setValue("modLogChannel", s.modLogChannel || "");
+    setValue("gemsLogChannel", s.gemsLogChannel || "");
+    setValue("ticketCategory", s.ticketCategory || "");
+    setValue("automod", String(s.automod || false));
+    setValue("antiLink", String(s.antiLink || false));
+    setValue("isPremium", String(s.isPremium || false));
+  } catch (err) {
+    console.error("Settings Load Error:", err);
+  }
 }
 
 async function saveGuildSettings() {
@@ -156,15 +216,19 @@ async function saveGuildSettings() {
     isPremium: getValue("isPremium") === "true"
   };
 
-  const res = await fetch(`/api/guild/${guildId}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body)
-  });
+  try {
+    const res = await fetch(`${BACKEND}/api/guild/${guildId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
 
-  const data = await res.json();
+    const data = await res.json();
 
-  alert(data.success ? "✅ Settings saved" : "❌ Save failed");
+    alert(data.success ? "✅ Settings saved" : "❌ Save failed");
+  } catch (err) {
+    alert("❌ Save error");
+  }
 }
 
 document.querySelectorAll("[data-page]").forEach(button => {
@@ -183,6 +247,7 @@ document.addEventListener("change", e => {
     localStorage.setItem("selectedGuild", e.target.value);
     loadGuildStats(e.target.value);
     loadGuildSettings(e.target.value);
+    loadGuildChannels(e.target.value);
   }
 });
 
