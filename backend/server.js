@@ -154,7 +154,7 @@ client.once("clientReady", async () => {
 
     console.log(`✅ Registered ${commands.length} slash commands.`);
   } catch (err) {
-    console.error(err);
+    console.error("SLASH REGISTER ERROR:", err);
   }
 });
 
@@ -162,23 +162,28 @@ client.on("interactionCreate", async interaction => {
   if (!interaction.isChatInputCommand()) return;
 
   const command = client.commands.get(interaction.commandName);
-  if (!command) return;
+
+  if (!command) {
+    return interaction.reply({
+      content: "❌ Command not found.",
+      ephemeral: true
+    }).catch(() => {});
+  }
 
   try {
     await command.execute(interaction);
   } catch (err) {
-    console.error(err);
+    console.error("COMMAND ERROR:", interaction.commandName, err);
 
-    if (interaction.replied || interaction.deferred) {
-      await interaction.followUp({
-        content: "❌ Command Error",
-        ephemeral: true
-      });
+    const errorMessage = {
+      content: "❌ Command Error. Check Render logs.",
+      ephemeral: true
+    };
+
+    if (interaction.deferred || interaction.replied) {
+      await interaction.followUp(errorMessage).catch(() => {});
     } else {
-      await interaction.reply({
-        content: "❌ Command Error",
-        ephemeral: true
-      });
+      await interaction.reply(errorMessage).catch(() => {});
     }
   }
 });
