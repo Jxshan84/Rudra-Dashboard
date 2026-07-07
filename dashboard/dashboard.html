@@ -76,27 +76,33 @@
 </section>
 
 <section class="page-section active-page" id="dashboard-page">
-  <h2>🏠 Dashboard Home</h2>
-  <p>Live bot stats, uptime and server data.</p>
-</section>
 
-<section class="page-section" id="moderation-page">
-  <h2>🛡️ Moderation Panel</h2>
+<h2>🏠 Server Overview</h2>
 
-  <label>Mod Log Channel ID</label>
-  <input type="text" id="modLogChannel" placeholder="Channel ID">
+<div class="cards">
 
-  <label>AutoMod</label>
-  <select id="automod">
-    <option value="false">Disabled</option>
-    <option value="true">Enabled</option>
-  </select>
+  <div class="card">
+    <h3>Server Name</h3>
+    <h1 id="guildName">Loading...</h1>
+  </div>
 
-  <label>Anti Link</label>
-  <select id="antiLink">
-    <option value="false">Disabled</option>
-    <option value="true">Enabled</option>
-  </select>
+  <div class="card">
+    <h3>Members</h3>
+    <h1 id="guildMembers">0</h1>
+  </div>
+
+  <div class="card">
+    <h3>Channels</h3>
+    <h1 id="guildChannels">0</h1>
+  </div>
+
+  <div class="card">
+    <h3>Roles</h3>
+    <h1 id="guildRoles">0</h1>
+  </div>
+
+</div>
+
 </section>
 
 <section class="page-section" id="economy-page">
