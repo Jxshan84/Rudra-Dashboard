@@ -6,17 +6,20 @@ module.exports = (client) => {
     res.json({
       success: true,
       bot: {
-        name: client.user ? client.user.username : "Starting...",
-        tag: client.user ? client.user.tag : "Starting...",
-        id: client.user ? client.user.id : null,
+        name: client.user?.username || "Starting...",
+        tag: client.user?.tag || "Starting...",
+        id: client.user?.id || null,
+        status: client.isReady() ? "Online" : "Offline",
         ping: client.ws.ping,
         uptime: process.uptime(),
         servers: client.guilds.cache.size,
         users: client.guilds.cache.reduce(
-          (total, guild) => total + (guild.memberCount || 0),
+          (a, g) => a + (g.memberCount || 0),
           0
         ),
-        commands: client.commands ? client.commands.size : 0
+        commands: client.commands?.size || 0,
+        ram: Math.round(process.memoryUsage().rss / 1024 / 1024),
+        node: process.version
       }
     });
   });
