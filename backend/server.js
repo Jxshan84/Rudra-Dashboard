@@ -21,7 +21,6 @@ const app = express();
 
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
-
 app.use(express.static(path.join(__dirname, "../")));
 
 app.use(session({
@@ -46,7 +45,12 @@ passport.use(new DiscordStrategy({
 }));
 
 const client = new Client({
-  intents: [GatewayIntentBits.Guilds]
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent
+  ]
 });
 
 client.commands = new Collection();
@@ -61,10 +65,11 @@ if (fs.existsSync(commandsPath)) {
     const folderPath = path.join(commandsPath, folder);
     if (!fs.lstatSync(folderPath).isDirectory()) continue;
 
-    const files = fs.readdirSync(folderPath).filter(f => f.endsWith(".js"));
+    const files = fs.readdirSync(folderPath).filter(file => file.endsWith(".js"));
 
     for (const file of files) {
       const command = require(path.join(folderPath, file));
+
       if (!command.data || !command.execute) continue;
 
       client.commands.set(command.data.name, command);
@@ -78,6 +83,7 @@ mongoose.connect(process.env.MONGODB_URI)
   .catch(err => console.error("❌ MongoDB Error:", err));
 
 app.use("/api/dashboard", require("./routes/dashboard")(client));
+app.use("/api/guild", require("./routes/guild")());
 
 app.get("/health", (req, res) => {
   res.json({
@@ -85,7 +91,10 @@ app.get("/health", (req, res) => {
     bot: client.user?.tag || "Starting...",
     ping: client.ws.ping,
     servers: client.guilds.cache.size,
-    users: client.guilds.cache.reduce((a, g) => a + (g.memberCount || 0), 0)
+    users: client.guilds.cache.reduce(
+      (a, g) => a + (g.memberCount || 0),
+      0
+    )
   });
 });
 
