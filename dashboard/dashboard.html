@@ -1,158 +1,146 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RUDRA Dashboard</title>
+
+<title>Nexora Dashboard</title>
 
 <link rel="stylesheet" href="dashboard.css">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
+
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
 </head>
 
 <body>
 
-<div class="sidebar">
-  <div class="logo">
-    <i class="fa-solid fa-shield-halved"></i>
-    <h2>RUDRA</h2>
-  </div>
-
-  <ul>
-    <li><i class="fa-solid fa-house"></i><span>Dashboard</span></li>
-    <li><i class="fa-solid fa-server"></i><span>Servers</span></li>
-    <li><i class="fa-solid fa-shield-halved"></i><span>Moderation</span></li>
-    <li><i class="fa-solid fa-coins"></i><span>Economy</span></li>
-    <li><i class="fa-solid fa-gem"></i><span>Premium</span></li>
-    <li><i class="fa-solid fa-ticket"></i><span>Tickets</span></li>
-    <li><i class="fa-solid fa-gear"></i><span>Settings</span></li>
-  </ul>
+<div id="loader">
+    <div class="loader-ring"></div>
+    <h2>NEXORA</h2>
 </div>
 
-<div class="main">
+<div class="background"></div>
 
-<header>
-  <h1>RUDRA Dashboard</h1>
+<div class="dashboard">
 
-  <div class="profile">
-    <img src="https://cdn.discordapp.com/embed/avatars/0.png">
-    <span>Loading...</span>
-  </div>
-</header>
+    <aside class="sidebar">
 
-<div class="server-selector">
-  <h3>Select Server</h3>
-  <select id="serverSelect">
-    <option value="">Loading servers...</option>
-  </select>
-</div>
+        <div class="logo">
 
-<div class="cards">
-  <div class="card"><h3>Servers</h3><h1 id="servers">0</h1></div>
-  <div class="card"><h3>Users</h3><h1 id="users">0</h1></div>
-  <div class="card"><h3>Ping</h3><h1 id="ping">0ms</h1></div>
-  <div class="card"><h3>Status</h3><h1 id="status">Loading...</h1></div>
-</div>
+            <img src="assets/logo.png">
 
-<div class="analytics">
-  <div class="card"><h3>Commands</h3><h1 id="commands">0</h1></div>
-  <div class="card"><h3>Bot Version</h3><h1 id="version">v1.0.0</h1></div>
-  <div class="card"><h3>Uptime</h3><h1 id="uptime">Loading...</h1></div>
-  <div class="card"><h3>Database</h3><h1 id="database">Checking...</h1></div>
-</div>
+            <h2>NEXORA</h2>
 
-<section class="panel">
-  <h2>Quick Actions</h2>
+        </div>
 
-  <div class="action-grid">
-    <button data-page="dashboard"><i class="fa-solid fa-house"></i> Dashboard</button>
-    <button data-page="moderation"><i class="fa-solid fa-shield-halved"></i> Moderation</button>
-    <button data-page="economy"><i class="fa-solid fa-coins"></i> Economy</button>
-    <button data-page="premium"><i class="fa-solid fa-gem"></i> Premium</button>
-    <button data-page="tickets"><i class="fa-solid fa-ticket"></i> Tickets</button>
-    <button data-page="settings"><i class="fa-solid fa-gear"></i> Settings</button>
-  </div>
-</section>
+        <nav>
 
-<section class="page-section active-page" id="dashboard-page">
+            <button data-page="dashboard">
+                <i class="fa-solid fa-house"></i>
+                Dashboard
+            </button>
 
-<h2>🏠 Server Overview</h2>
+            <button data-page="server">
+                <i class="fa-solid fa-server"></i>
+                Server
+            </button>
 
-<div class="cards">
+            <button data-page="moderation">
+                <i class="fa-solid fa-shield-halved"></i>
+                Moderation
+            </button>
 
-  <div class="card">
-    <h3>Server Name</h3>
-    <h1 id="guildName">Loading...</h1>
-  </div>
+            <button data-page="automod">
+                <i class="fa-solid fa-robot"></i>
+                AutoMod
+            </button>
 
-  <div class="card">
-    <h3>Members</h3>
-    <h1 id="guildMembers">0</h1>
-  </div>
+            <button data-page="economy">
+                <i class="fa-solid fa-coins"></i>
+                Economy
+            </button>
 
-  <div class="card">
-    <h3>Channels</h3>
-    <h1 id="guildChannels">0</h1>
-  </div>
+            <button data-page="tickets">
+                <i class="fa-solid fa-ticket"></i>
+                Tickets
+            </button>
 
-  <div class="card">
-    <h3>Roles</h3>
-    <h1 id="guildRoles">0</h1>
-  </div>
+            <button data-page="giveaway">
+                <i class="fa-solid fa-gift"></i>
+                Giveaways
+            </button>
 
-</div>
+            <button data-page="music">
+                <i class="fa-solid fa-music"></i>
+                Music
+            </button>
 
-</section>
+            <button data-page="analytics">
+                <i class="fa-solid fa-chart-line"></i>
+                Analytics
+            </button>
 
-<section class="page-section" id="economy-page">
-  <h2>💰 Economy Panel</h2>
-  <p>Coins, gems, shop, redeem codes and leaderboard settings will appear here.</p>
-</section>
+            <button data-page="settings">
+                <i class="fa-solid fa-gear"></i>
+                Settings
+            </button>
 
-<section class="page-section" id="premium-page">
-  <h2>💎 Premium Panel</h2>
+            <button id="ownerPanel" style="display:none;">
+                👑 Owner Panel
+            </button>
 
-  <label>Premium Server</label>
-  <select id="isPremium">
-    <option value="false">No</option>
-    <option value="true">Yes</option>
-  </select>
+        </nav>
 
-  <label>Gems Log Channel ID</label>
-  <input type="text" id="gemsLogChannel" placeholder="Channel ID">
-</section>
+    </aside>
 
-<section class="page-section" id="tickets-page">
-  <h2>🎫 Ticket Panel</h2>
+    <main class="content">
 
-  <label>Ticket Category ID</label>
-  <input type="text" id="ticketCategory" placeholder="Category ID">
-</section>
+        <header>
 
-<section class="page-section" id="settings-page">
-  <h2>⚙️ Server Settings</h2>
+            <h1>Nexora Dashboard</h1>
 
-  <label>Prefix</label>
-  <input type="text" id="prefix" placeholder="/">
+            <div class="profile">
 
-  <label>Welcome Channel ID</label>
-  <input type="text" id="welcomeChannel" placeholder="Channel ID">
+                <img id="avatar">
 
-  <label>Leave Channel ID</label>
-  <input type="text" id="leaveChannel" placeholder="Channel ID">
+                <span id="username">
+                    Loading...
+                </span>
 
-  <label>Auto Role ID</label>
-  <input type="text" id="autoRole" placeholder="Role ID">
+            </div>
 
-  <button id="saveSettings">
-    💾 Save Settings
-  </button>
-</section>
+        </header>
+
+        <div class="server-select">
+
+            <label>Select Server</label>
+
+            <select id="serverSelect">
+
+                <option>
+                    Loading...
+                </option>
+
+            </select>
+
+        </div>
+
+        <div id="pages">
+
+        </div>
+
+    </main>
 
 </div>
 
 <script src="dashboard.js"></script>
 
 </body>
+
 </html>
