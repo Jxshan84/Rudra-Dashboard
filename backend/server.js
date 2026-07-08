@@ -105,10 +105,6 @@ app.get(
   "/auth/discord/callback",
   passport.authenticate("discord", { failureRedirect: "/" }),
   (req, res) => {
-    if (req.user.id === process.env.OWNER_ID) {
-      return res.redirect("/dashboard/owner/owner.html");
-    }
-
     return res.redirect("/dashboard/dashboard.html");
   }
 );
