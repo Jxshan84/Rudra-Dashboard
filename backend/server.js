@@ -158,40 +158,40 @@ client.once("clientReady", async () => {
   }
 });
 
-client.on("interactionCreate", async interaction => {
+
+    client.on("interactionCreate", async interaction => {
+  console.log("INTERACTION:", interaction.type, interaction.commandName);
+
   if (!interaction.isChatInputCommand()) return;
 
   const command = client.commands.get(interaction.commandName);
+  console.log("COMMAND FOUND:", !!command);
 
   if (!command) {
     return interaction.reply({
-      content: "❌ Command not found.",
+      content: "❌ Command not found in bot.",
       ephemeral: true
-    }).catch(() => {});
+    }).catch(console.error);
   }
 
   try {
-    await command.execute(interaction);
+    await interaction.deferReply({ ephemeral: false });
+
+    await command.execute({
+      ...interaction,
+      reply: interaction.editReply.bind(interaction)
+    });
+
   } catch (err) {
     console.error("COMMAND ERROR:", interaction.commandName, err);
 
-    const errorMessage = {
-      content: "❌ Command Error. Check Render logs.",
-      ephemeral: true
-    };
-
     if (interaction.deferred || interaction.replied) {
-      await interaction.followUp(errorMessage).catch(() => {});
+      await interaction.editReply("❌ Command error. Check Render logs.").catch(console.error);
     } else {
-      await interaction.reply(errorMessage).catch(() => {});
+      await interaction.reply({
+        content: "❌ Command error. Check Render logs.",
+        ephemeral: true
+      }).catch(console.error);
     }
   }
-});
-
-client.login(process.env.TOKEN);
-
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
 });
