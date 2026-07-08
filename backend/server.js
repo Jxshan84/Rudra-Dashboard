@@ -195,3 +195,10 @@ client.once("clientReady", async () => {
     }
   }
 });
+client.login(process.env.TOKEN);
+
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});
