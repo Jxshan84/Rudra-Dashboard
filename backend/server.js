@@ -158,8 +158,7 @@ client.once("clientReady", async () => {
   }
 });
 
-
-    client.on("interactionCreate", async interaction => {
+client.on("interactionCreate", async interaction => {
   console.log("INTERACTION:", interaction.type, interaction.commandName);
 
   if (!interaction.isChatInputCommand()) return;
@@ -175,18 +174,15 @@ client.once("clientReady", async () => {
   }
 
   try {
-    await interaction.deferReply({ ephemeral: false });
-
-    await command.execute({
-      ...interaction,
-      reply: interaction.editReply.bind(interaction)
-    });
-
+    await command.execute(interaction);
   } catch (err) {
     console.error("COMMAND ERROR:", interaction.commandName, err);
 
-    if (interaction.deferred || interaction.replied) {
-      await interaction.editReply("❌ Command error. Check Render logs.").catch(console.error);
+    if (interaction.replied || interaction.deferred) {
+      await interaction.followUp({
+        content: "❌ Command error. Check Render logs.",
+        ephemeral: true
+      }).catch(console.error);
     } else {
       await interaction.reply({
         content: "❌ Command error. Check Render logs.",
@@ -195,6 +191,7 @@ client.once("clientReady", async () => {
     }
   }
 });
+  
 client.login(process.env.TOKEN);
 
 const PORT = process.env.PORT || 3000;
