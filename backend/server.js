@@ -69,6 +69,7 @@ if (fs.existsSync(commandsPath)) {
 
     for (const file of files) {
       const command = require(path.join(folderPath, file));
+
       if (!command.data || !command.execute) continue;
 
       client.commands.set(command.data.name, command);
@@ -91,7 +92,10 @@ app.get("/health", (req, res) => {
     bot: client.user?.tag || "Starting...",
     ping: client.ws.ping,
     servers: client.guilds.cache.size,
-    users: client.guilds.cache.reduce((a, g) => a + (g.memberCount || 0), 0)
+    users: client.guilds.cache.reduce(
+      (a, g) => a + (g.memberCount || 0),
+      0
+    )
   });
 });
 
@@ -101,13 +105,19 @@ app.get(
   "/auth/discord/callback",
   passport.authenticate("discord", { failureRedirect: "/" }),
   (req, res) => {
-    res.redirect("/dashboard/dashboard.html");
+    if (req.user.id === process.env.OWNER_ID) {
+      return res.redirect("/dashboard/owner/owner.html");
+    }
+
+    return res.redirect("/dashboard/dashboard.html");
   }
 );
 
 app.get("/api/user", (req, res) => {
   if (!req.user) {
-    return res.status(401).json({ loggedIn: false });
+    return res.status(401).json({
+      loggedIn: false
+    });
   }
 
   res.json({
@@ -123,7 +133,9 @@ app.get("/api/user", (req, res) => {
 
 app.get("/api/guilds", (req, res) => {
   if (!req.user) {
-    return res.status(401).json({ message: "Not logged in" });
+    return res.status(401).json({
+      message: "Not logged in"
+    });
   }
 
   const guilds = (req.user.guilds || []).filter(g => {
