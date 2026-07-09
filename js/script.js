@@ -1,31 +1,95 @@
-const API = "https://nexora-dashboard-klgw.onrender.com/health";
+const BACKEND = "https://nexora-dashboard-klgw.onrender.com";
 
-async function updateStatus() {
+// Redirect if already logged in
+(async () => {
   try {
-    const res = await fetch(API);
+    const res = await fetch(`${BACKEND}/api/user`, {
+      credentials: "include"
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+
+      if (data.loggedIn) {
+        window.location.href = `${BACKEND}/dashboard/dashboard.html`;
+      }
+    }
+  } catch (err) {
+    console.log("Not logged in.");
+  }
+})();
+
+// Online Status Check
+async function updateStatus() {
+  const statusText = document.querySelector(".status strong");
+  const dot = document.querySelector(".online-dot");
+
+  if (!statusText || !dot) return;
+
+  try {
+    const res = await fetch(`${BACKEND}/health`);
     const data = await res.json();
 
-    document.getElementById("servers").textContent = data.servers;
-    document.getElementById("users").textContent = data.users;
-    document.getElementById("ping").textContent = data.ping + "ms";
-    document.getElementById("botstatus").textContent = data.status;
+    if (data.status === "Online") {
+      statusText.textContent = "ONLINE";
+      statusText.style.color = "#00ff88";
+      dot.style.background = "#00ff88";
+      dot.style.boxShadow = "0 0 15px #00ff88";
+    } else {
+      statusText.textContent = "OFFLINE";
+      statusText.style.color = "#ff3b3b";
+      dot.style.background = "#ff3b3b";
+      dot.style.boxShadow = "0 0 15px #ff3b3b";
+    }
 
-    const serverCount = document.getElementById("serverCount");
-    if (serverCount) serverCount.textContent = data.servers;
+  } catch {
 
-    const memberCount = document.getElementById("memberCount");
-    if (memberCount) memberCount.textContent = data.users;
+    statusText.textContent = "OFFLINE";
+    statusText.style.color = "#ff3b3b";
+    dot.style.background = "#ff3b3b";
+    dot.style.boxShadow = "0 0 15px #ff3b3b";
 
-    const dashboardPing = document.getElementById("dashboardPing");
-    if (dashboardPing) dashboardPing.textContent = data.ping + "ms";
-
-    const dashboardStatus = document.getElementById("dashboardStatus");
-    if (dashboardStatus) dashboardStatus.textContent = data.status;
-
-  } catch (err) {
-    console.error("Dashboard Error:", err);
   }
 }
 
 updateStatus();
+
 setInterval(updateStatus, 10000);
+
+// Card Animation
+const card = document.querySelector(".glass");
+
+document.addEventListener("mousemove", (e) => {
+
+  if (!card) return;
+
+  const x = (window.innerWidth / 2 - e.clientX) / 40;
+  const y = (window.innerHeight / 2 - e.clientY) / 40;
+
+  card.style.transform =
+    `rotateY(${-x}deg) rotateX(${y}deg)`;
+
+});
+
+document.addEventListener("mouseleave", () => {
+
+  if (!card) return;
+
+  card.style.transform =
+    "rotateX(0deg) rotateY(0deg)";
+
+});
+
+// Keyboard Shortcut
+document.addEventListener("keydown", e => {
+
+  if (e.key === "Enter") {
+
+    window.location.href =
+      `${BACKEND}/auth/discord`;
+
+  }
+
+});
+
+console.log("✅ RUDRA Login Loaded");
