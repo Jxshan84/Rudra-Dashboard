@@ -1,95 +1,140 @@
 const BACKEND = "https://nexora-dashboard-klgw.onrender.com";
 
-// Redirect if already logged in
-(async () => {
-  try {
-    const res = await fetch(`${BACKEND}/api/user`, {
-      credentials: "include"
-    });
+const loader = document.getElementById("loader");
+const loaderText = document.getElementById("loaderText");
+const cursorGlow = document.querySelector(".cursor-glow");
 
-    if (res.ok) {
-      const data = await res.json();
+const loadingMessages = [
+  "Initializing RUDRA...",
+  "Loading Security Modules...",
+  "Connecting Discord...",
+  "Connecting Database...",
+  "Checking Bot Status...",
+  "Preparing Dashboard..."
+];
 
-      if (data.loggedIn) {
-        window.location.href = `${BACKEND}/dashboard/dashboard.html`;
-      }
-    }
-  } catch (err) {
-    console.log("Not logged in.");
+let i = 0;
+
+setInterval(() => {
+  if (loaderText) {
+    loaderText.textContent = loadingMessages[i];
+    i = (i + 1) % loadingMessages.length;
   }
-})();
+}, 650);
 
-// Online Status Check
-async function updateStatus() {
-  const statusText = document.querySelector(".status strong");
-  const dot = document.querySelector(".online-dot");
+window.addEventListener("load", () => {
 
-  if (!statusText || !dot) return;
+  setTimeout(() => {
 
-  try {
+    loader.style.opacity = "0";
+    loader.style.pointerEvents = "none";
+
+    setTimeout(() => {
+      loader.style.display = "none";
+    }, 500);
+
+  }, 3500);
+
+});
+
+document.addEventListener("mousemove", e => {
+
+  if (!cursorGlow) return;
+
+  cursorGlow.style.left = e.clientX + "px";
+  cursorGlow.style.top = e.clientY + "px";
+
+});
+
+async function updateStatus(){
+
+  const status = document.querySelector(".status b");
+  const dot = document.querySelector(".dot");
+
+  if(!status) return;
+
+  try{
+
     const res = await fetch(`${BACKEND}/health`);
+
     const data = await res.json();
 
-    if (data.status === "Online") {
-      statusText.textContent = "ONLINE";
-      statusText.style.color = "#00ff88";
-      dot.style.background = "#00ff88";
-      dot.style.boxShadow = "0 0 15px #00ff88";
-    } else {
-      statusText.textContent = "OFFLINE";
-      statusText.style.color = "#ff3b3b";
-      dot.style.background = "#ff3b3b";
-      dot.style.boxShadow = "0 0 15px #ff3b3b";
+    if(data.status==="Online"){
+
+      status.textContent="ONLINE";
+
+      status.style.color="#00ff88";
+
+      dot.style.background="#00ff88";
+
+      dot.style.boxShadow="0 0 18px #00ff88";
+
+    }else{
+
+      status.textContent="OFFLINE";
+
+      status.style.color="#ff3333";
+
+      dot.style.background="#ff3333";
+
+      dot.style.boxShadow="0 0 18px #ff3333";
+
     }
 
-  } catch {
+  }catch{
 
-    statusText.textContent = "OFFLINE";
-    statusText.style.color = "#ff3b3b";
-    dot.style.background = "#ff3b3b";
-    dot.style.boxShadow = "0 0 15px #ff3b3b";
+      status.textContent="OFFLINE";
+
+      status.style.color="#ff3333";
 
   }
+
 }
 
 updateStatus();
 
-setInterval(updateStatus, 10000);
+setInterval(updateStatus,10000);
 
-// Card Animation
-const card = document.querySelector(".glass");
+async function checkLogin(){
 
-document.addEventListener("mousemove", (e) => {
+  try{
 
-  if (!card) return;
+    const res=await fetch(`${BACKEND}/api/user`,{
 
-  const x = (window.innerWidth / 2 - e.clientX) / 40;
-  const y = (window.innerHeight / 2 - e.clientY) / 40;
+      credentials:"include"
 
-  card.style.transform =
-    `rotateY(${-x}deg) rotateX(${y}deg)`;
+    });
 
-});
+    if(!res.ok) return;
 
-document.addEventListener("mouseleave", () => {
+    const user=await res.json();
 
-  if (!card) return;
+    if(user.loggedIn){
 
-  card.style.transform =
-    "rotateX(0deg) rotateY(0deg)";
+      window.location.href=`${BACKEND}/dashboard/dashboard.html`;
 
-});
+    }
 
-// Keyboard Shortcut
-document.addEventListener("keydown", e => {
+  }catch{}
 
-  if (e.key === "Enter") {
+}
 
-    window.location.href =
-      `${BACKEND}/auth/discord`;
+setTimeout(checkLogin,4200);
+
+document.addEventListener("keydown",e=>{
+
+  if(e.key==="Enter"){
+
+    window.location.href=`${BACKEND}/auth/discord`;
 
   }
 
 });
 
-console.log("✅ RUDRA Login Loaded");
+document.querySelector(".login-btn")?.addEventListener("mouseenter",()=>{
+
+  navigator.vibrate?.(15);
+
+});
+
+console.log("✅ RUDRA Login Ready");
