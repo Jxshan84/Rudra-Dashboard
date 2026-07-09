@@ -85,6 +85,7 @@ mongoose.connect(process.env.MONGODB_URI)
 app.use("/api/dashboard", require("./routes/dashboard")(client));
 app.use("/api/guild", require("./routes/guild")(client));
 app.use("/api/owner", require("./routes/owner")(client));
+app.use("/api/reactionrole", require("./routes/reactionrole")(client));
 
 app.get("/health", (req, res) => {
   res.json({
