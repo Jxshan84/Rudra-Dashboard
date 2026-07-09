@@ -587,3 +587,93 @@ font-size:26px;
 }
 
 }
+/* ===== RUDRA MOBILE SIDEBAR FIX ===== */
+
+@media(max-width:900px){
+
+body{
+overflow:auto;
+}
+
+.dashboard{
+flex-direction:column;
+height:auto;
+min-height:100vh;
+}
+
+.sidebar{
+position:sticky;
+top:0;
+z-index:999;
+width:100%;
+height:auto;
+padding:14px 16px;
+border-right:none;
+border-bottom:1px solid rgba(255,0,0,.25);
+background:rgba(5,5,5,.97);
+}
+
+.logo{
+margin-bottom:14px;
+}
+
+.logo-mark{
+width:42px;
+height:42px;
+font-size:22px;
+}
+
+.logo h2{
+font-size:24px;
+letter-spacing:5px;
+}
+
+.sidebar nav{
+display:flex;
+flex-direction:row;
+gap:10px;
+overflow-x:auto;
+padding-bottom:6px;
+}
+
+.sidebar nav::-webkit-scrollbar{
+height:4px;
+}
+
+.sidebar button{
+min-width:max-content;
+padding:10px 14px;
+font-size:13px;
+border-radius:999px;
+white-space:nowrap;
+}
+
+.sidebar button:hover{
+transform:none;
+}
+
+.content{
+padding:18px;
+}
+
+header{
+margin-top:10px;
+}
+
+header h1{
+font-size:25px;
+}
+
+.sub-title{
+font-size:13px;
+}
+
+.server-select select{
+max-width:100%;
+}
+
+.reaction-layout{
+grid-template-columns:1fr;
+}
+
+}
