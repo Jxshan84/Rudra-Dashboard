@@ -42,18 +42,12 @@ function fillSelect(id, items, placeholder) {
 }
 
 function showPage(pageId) {
-  document.querySelectorAll(".page").forEach(page => {
-    page.classList.remove("active");
-  });
-
-  const page = document.getElementById(pageId);
-  if (page) page.classList.add("active");
+  document.querySelectorAll(".page").forEach(page => page.classList.remove("active"));
+  document.getElementById(pageId)?.classList.add("active");
 }
 
 document.querySelectorAll("[data-page]").forEach(button => {
-  button.addEventListener("click", () => {
-    showPage(button.dataset.page);
-  });
+  button.addEventListener("click", () => showPage(button.dataset.page));
 });
 
 window.addEventListener("load", async () => {
@@ -64,14 +58,14 @@ window.addEventListener("load", async () => {
     if (loader) loader.style.display = "none";
   }, 3800);
 
-  await loadDashboard();
-
   const logged = await loadUser();
   if (!logged) return;
 
   await loadGuilds();
 
-  setInterval(loadDashboard, 5000);
+  setInterval(() => {
+    if (currentGuild) loadSelectedGuildStats(currentGuild);
+  }, 5000);
 });
 
 function startLoaderText() {
@@ -87,41 +81,15 @@ function startLoaderText() {
   ];
 
   let index = 0;
-
   setInterval(() => {
     loaderText.textContent = messages[index % messages.length];
     index++;
   }, 700);
 }
 
-async function loadDashboard() {
-  try {
-    const res = await fetch(`${BACKEND}/api/dashboard/stats`);
-    const data = await res.json();
-    const bot = data.bot || {};
-
-    setText("status", bot.status === "Online" ? "🟢 Online" : "🔴 Offline");
-    setText("ping", `${bot.ping || 0} ms`);
-    setText("servers", bot.servers || 0);
-    setText("users", bot.users || 0);
-    setText("commands", bot.commands || 0);
-    setText("ram", `${bot.ram || 0} MB`);
-    setText("node", bot.node || "Unknown");
-    setText("database", "🟢 Connected");
-
-    setText("ownerServers", bot.servers || 0);
-    setText("ownerBotStatus", bot.status || "Offline");
-  } catch (err) {
-    setText("status", "🔴 Offline");
-    setText("database", "🔴 Error");
-  }
-}
-
 async function loadUser() {
   try {
-    const res = await fetch(`${BACKEND}/api/user`, {
-      credentials: "include"
-    });
+    const res = await fetch(`${BACKEND}/api/user`, { credentials: "include" });
 
     if (res.status === 401) {
       window.location.href = `${BACKEND}/auth/discord`;
@@ -135,15 +103,13 @@ async function loadUser() {
 
     const avatar = document.getElementById("avatar");
     if (avatar && user.avatar) {
-      avatar.src =
-        `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`;
+      avatar.src = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`;
     }
 
     if (user.owner) {
       document.querySelectorAll(".owner-only").forEach(btn => {
         btn.style.display = "block";
       });
-
       await loadOwnerServers();
     }
 
@@ -156,13 +122,10 @@ async function loadUser() {
 
 async function loadGuilds() {
   try {
-    const res = await fetch(`${BACKEND}/api/guilds`, {
-      credentials: "include"
-    });
-
+    const res = await fetch(`${BACKEND}/api/guilds`, { credentials: "include" });
     const guilds = await res.json();
-    const select = document.getElementById("serverSelect");
 
+    const select = document.getElementById("serverSelect");
     if (!select) return;
 
     select.innerHTML = "";
@@ -200,10 +163,37 @@ async function loadGuildData(guildId) {
 
   currentGuild = guildId;
 
+  await loadSelectedGuildStats(guildId);
   await loadGuildChannels(guildId);
   await loadGuildRoles(guildId);
   await loadGuildSettings(guildId);
   await loadReactionRoles(guildId);
+}
+
+async function loadSelectedGuildStats(guildId) {
+  try {
+    const res = await fetch(`${BACKEND}/api/guild/${guildId}/stats`);
+    const data = await res.json();
+
+    if (!data.success) return;
+
+    const g = data.guild || {};
+    const s = data.settings || {};
+
+    setText("status", "🟢 Selected");
+    setText("ping", "Live");
+    setText("servers", g.name || "Server");
+    setText("users", g.members || 0);
+    setText("commands", g.roles || 0);
+    setText("ram", g.channels || 0);
+    setText("node", s.isPremium ? "Premium" : "Free");
+    setText("database", "🟢 Saved");
+
+    setText("ownerBotStatus", "Online");
+  } catch (err) {
+    console.log("Selected guild stats error", err);
+    setText("status", "🔴 Error");
+  }
 }
 
 async function loadGuildChannels(guildId) {
@@ -219,7 +209,6 @@ async function loadGuildChannels(guildId) {
     fillSelect("leaveChannel", allChannels, "Select Leave Channel");
     fillSelect("modLogChannel", allChannels, "Select Mod Log Channel");
     fillSelect("ticketCategory", allChannels, "Select Ticket Channel");
-
     fillSelect("rrChannel", allChannels, "Select Channel");
     fillSelect("rrExistingChannel", allChannels, "Select Channel");
   } catch (err) {
@@ -238,7 +227,6 @@ async function loadGuildRoles(guildId) {
 
     fillSelect("autoRole", allRoles, "Select Auto Role");
     fillSelect("verifyRole", allRoles, "Select Verification Role");
-
     fillSelect("rrRole", allRoles, "Select Role");
     fillSelect("rrExistingRole", allRoles, "Select Role");
   } catch (err) {
@@ -261,468 +249,249 @@ async function loadGuildSettings(guildId) {
     setValue("modLogChannel", s.modLogChannel || "");
     setValue("ticketCategory", s.ticketCategory || "");
     setValue("autoRole", s.autoRole || "");
-    setValue("verifyRole", s.verifyRole || "");
+    setValue("verifyRole", s.verificationRole || s.verifyRole || "");
     setValue("antiLink", String(s.antiLink || false));
     setValue("antiBot", String(s.antiBot || false));
   } catch (err) {
     console.log("Settings load error", err);
   }
 }
-// ==============================
-// SAVE SETTINGS
-// ==============================
 
 async function saveSettings() {
+  if (!currentGuild) return notify("Select a server first.");
 
-    if (!currentGuild) {
-        return notify("Select a server first.");
-    }
+  const body = {
+    prefix: getValue("prefix") || "/",
+    welcomeChannel: getValue("welcomeChannel"),
+    leaveChannel: getValue("leaveChannel"),
+    modLogChannel: getValue("modLogChannel"),
+    ticketCategory: getValue("ticketCategory"),
+    autoRole: getValue("autoRole"),
+    verifyRole: getValue("verifyRole"),
+    antiLink: getValue("antiLink") === "true",
+    antiBot: getValue("antiBot") === "true"
+  };
 
-    const body = {
-        prefix: getValue("prefix") || "/",
-        welcomeChannel: getValue("welcomeChannel"),
-        leaveChannel: getValue("leaveChannel"),
-        modLogChannel: getValue("modLogChannel"),
-        ticketCategory: getValue("ticketCategory"),
-        autoRole: getValue("autoRole"),
-        verifyRole: getValue("verifyRole"),
-        antiLink: getValue("antiLink") === "true",
-        antiBot: getValue("antiBot") === "true"
-    };
+  try {
+    const res = await fetch(`${BACKEND}/api/guild/${currentGuild}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
 
-    try {
-
-        const res = await fetch(`${BACKEND}/api/guild/${currentGuild}`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(body)
-        });
-
-        const data = await res.json();
-
-        if (data.success) {
-
-            notify("✅ Settings Saved Successfully.");
-
-        } else {
-
-            notify("❌ Failed to save settings.");
-
-        }
-
-    } catch {
-
-        notify("❌ Failed to connect backend.");
-
-    }
-
+    const data = await res.json();
+    notify(data.success ? "✅ Settings Saved Successfully." : "❌ Failed to save settings.");
+  } catch {
+    notify("❌ Failed to connect backend.");
+  }
 }
-
-// ==============================
-// REACTION ROLE PREVIEW
-// ==============================
 
 function updateReactionPreview() {
+  setText("previewTitle", getValue("rrTitle") || "Choose your roles");
+  setText("previewDescription", getValue("rrDescription") || "React below to receive your role.");
+  setText("previewEmoji", getValue("rrEmoji") || "😀");
 
-    setText(
-        "previewTitle",
-        getValue("rrTitle") || "Choose your roles"
-    );
+  const role = document.getElementById("rrRole");
+  if (role) setText("previewRole", role.options[role.selectedIndex]?.text || "Selected Role");
+}
 
-    setText(
-        "previewDescription",
-        getValue("rrDescription") || "React below to receive your role."
-    );
+["rrTitle", "rrDescription", "rrEmoji"].forEach(id => {
+  document.getElementById(id)?.addEventListener("input", updateReactionPreview);
+});
 
-    setText(
-        "previewEmoji",
-        getValue("rrEmoji") || "😀"
-    );
+document.getElementById("rrRole")?.addEventListener("change", updateReactionPreview);
 
-    const role =
-        document.getElementById("rrRole");
+async function createReactionRole() {
+  if (!currentGuild) return notify("Select a server first.");
 
-    if (role) {
+  const body = {
+    guildId: currentGuild,
+    channelId: getValue("rrChannel"),
+    title: getValue("rrTitle"),
+    description: getValue("rrDescription"),
+    color: "#ff0000",
+    footer: "Powered by RUDRA",
+    type: getValue("rrType") || "normal",
+    roles: [
+      {
+        emoji: getValue("rrEmoji"),
+        roleId: getValue("rrRole"),
+        label: "",
+        description: ""
+      }
+    ],
+    createdBy: currentUser?.id
+  };
 
-        setText(
-            "previewRole",
-            role.options[role.selectedIndex]?.text || "Selected Role"
-        );
+  if (!body.channelId || !body.roles[0].emoji || !body.roles[0].roleId) {
+    return notify("Channel, role and emoji required.");
+  }
 
+  try {
+    const res = await fetch(`${BACKEND}/api/reactionrole/create`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      notify("✅ Reaction Role Created.");
+      loadReactionRoles(currentGuild);
+    } else {
+      notify(data.message || "Failed.");
+    }
+  } catch {
+    notify("Backend Error.");
+  }
+}
+
+async function createExistingReactionRole() {
+  if (!currentGuild) return notify("Select a server first.");
+
+  const body = {
+    guildId: currentGuild,
+    channelId: getValue("rrExistingChannel"),
+    messageId: getValue("rrExistingMessageId"),
+    roles: [
+      {
+        emoji: getValue("rrExistingEmoji"),
+        roleId: getValue("rrExistingRole"),
+        label: "",
+        description: ""
+      }
+    ],
+    createdBy: currentUser?.id
+  };
+
+  if (!body.channelId || !body.messageId || !body.roles[0].emoji || !body.roles[0].roleId) {
+    return notify("Channel, message ID, role and emoji required.");
+  }
+
+  try {
+    const res = await fetch(`${BACKEND}/api/reactionrole/existing`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      notify("✅ Added Successfully.");
+      loadReactionRoles(currentGuild);
+    } else {
+      notify(data.message || "Failed.");
+    }
+  } catch {
+    notify("Backend Error.");
+  }
+}
+
+async function loadReactionRoles(guildId) {
+  try {
+    const res = await fetch(`${BACKEND}/api/reactionrole/${guildId}`);
+    const data = await res.json();
+
+    const list = document.getElementById("reactionRoleList");
+    if (!list) return;
+
+    list.innerHTML = "";
+
+    if (!Array.isArray(data) || data.length === 0) {
+      list.innerHTML = `<div class="server-item">No Reaction Roles Found</div>`;
+      return;
     }
 
+    data.forEach(rr => {
+      const roleLines = (rr.roles || [])
+        .map(r => `<p><b>${r.emoji}</b> Role ID: ${r.roleId}</p>`)
+        .join("");
+
+      const div = document.createElement("div");
+      div.className = "server-item";
+
+      div.innerHTML = `
+        <h3>${rr.title || "Reaction Role"}</h3>
+        ${roleLines}
+        <p><b>Message ID:</b> ${rr.messageId}</p>
+        <button onclick="deleteReactionRole('${rr._id}')">🗑 Delete</button>
+      `;
+
+      list.appendChild(div);
+    });
+  } catch (err) {
+    console.log(err);
+  }
 }
 
-[
-"rrTitle",
-"rrDescription",
-"rrEmoji"
-].forEach(id=>{
+async function deleteReactionRole(id) {
+  if (!confirm("Delete this Reaction Role?")) return;
 
-const el=document.getElementById(id);
-
-if(el){
-
-el.addEventListener("input",updateReactionPreview);
-
+  try {
+    await fetch(`${BACKEND}/api/reactionrole/${id}`, { method: "DELETE" });
+    notify("✅ Deleted");
+    loadReactionRoles(currentGuild);
+  } catch {
+    notify("❌ Failed");
+  }
 }
 
+window.deleteReactionRole = deleteReactionRole;
+
+async function loadOwnerServers() {
+  try {
+    const res = await fetch(`${BACKEND}/api/owner/servers`, { credentials: "include" });
+    const data = await res.json();
+
+    if (!data.success) return;
+
+    setText("ownerServers", data.total || 0);
+
+    const list = document.getElementById("ownerServerList");
+    if (!list) return;
+
+    list.innerHTML = "";
+
+    data.guilds.forEach(guild => {
+      const div = document.createElement("div");
+      div.className = "server-item";
+
+      div.innerHTML = `
+        <h3>${guild.name}</h3>
+        <p>ID: ${guild.id}</p>
+        <p>Members: ${guild.members}</p>
+        <p>Owner: ${guild.ownerId}</p>
+      `;
+
+      list.appendChild(div);
+    });
+  } catch (err) {
+    console.log(err);
+  }
+}
+
+document.addEventListener("change", e => {
+  if (e.target.id === "serverSelect") {
+    currentGuild = e.target.value;
+    localStorage.setItem("selectedGuild", currentGuild);
+    loadGuildData(currentGuild);
+  }
 });
 
-const rrRole=document.getElementById("rrRole");
-
-if(rrRole){
-
-rrRole.addEventListener("change",updateReactionPreview);
-
-}
-
-// ==============================
-// CREATE REACTION ROLE
-// ==============================
-
-async function createReactionRole(){
-
-if(!currentGuild){
-
-return notify("Select a server first.");
-
-}
-
-const body={
-
-guildId:currentGuild,
-channelId:getValue("rrChannel"),
-roleId:getValue("rrRole"),
-emoji:getValue("rrEmoji"),
-title:getValue("rrTitle"),
-description:getValue("rrDescription"),
-createdBy:currentUser?.id
-
-};
-
-try{
-
-const res=await fetch(
-`${BACKEND}/api/reactionrole/create`,
-{
-
-method:"POST",
-
-headers:{
-"Content-Type":"application/json"
-},
-
-body:JSON.stringify(body)
-
-}
-);
-
-const data=await res.json();
-
-if(data.success){
-
-notify("✅ Reaction Role Created.");
-
-loadReactionRoles(currentGuild);
-
-}else{
-
-notify(data.message||"Failed.");
-
-}
-
-}catch{
-
-notify("Backend Error.");
-
-}
-
-}
-
-// ==============================
-// EXISTING MESSAGE
-// ==============================
-
-async function createExistingReactionRole(){
-
-if(!currentGuild){
-
-return notify("Select a server first.");
-
-}
-
-const body={
-
-guildId:currentGuild,
-channelId:getValue("rrExistingChannel"),
-messageId:getValue("rrExistingMessageId"),
-roleId:getValue("rrExistingRole"),
-emoji:getValue("rrExistingEmoji"),
-createdBy:currentUser?.id
-
-};
-
-try{
-
-const res=await fetch(
-`${BACKEND}/api/reactionrole/existing`,
-{
-
-method:"POST",
-
-headers:{
-"Content-Type":"application/json"
-},
-
-body:JSON.stringify(body)
-
-}
-);
-
-const data=await res.json();
-
-if(data.success){
-
-notify("✅ Added Successfully.");
-
-loadReactionRoles(currentGuild);
-
-}else{
-
-notify(data.message||"Failed.");
-
-}
-
-}catch{
-
-notify("Backend Error.");
-
-}
-
-}
-// ==============================
-// LOAD REACTION ROLE LIST
-// ==============================
-
-async function loadReactionRoles(guildId){
-
-try{
-
-const res=await fetch(`${BACKEND}/api/reactionrole/${guildId}`);
-
-const data=await res.json();
-
-const list=document.getElementById("reactionRoleList");
-
-if(!list) return;
-
-list.innerHTML="";
-
-if(!Array.isArray(data)||data.length===0){
-
-list.innerHTML=`
-<div class="server-item">
-No Reaction Roles Found
-</div>
-`;
-
-return;
-
-}
-
-data.forEach(rr=>{
-
-const div=document.createElement("div");
-
-div.className="server-item";
-
-div.innerHTML=`
-
-<h3>${rr.title||"Reaction Role"}</h3>
-
-<p><b>Emoji:</b> ${rr.emoji}</p>
-
-<p><b>Role ID:</b> ${rr.roleId}</p>
-
-<p><b>Message ID:</b> ${rr.messageId}</p>
-
-<button onclick="deleteReactionRole('${rr._id}')">
-🗑 Delete
-</button>
-
-`;
-
-list.appendChild(div);
-
+document.addEventListener("click", e => {
+  switch (e.target.id) {
+    case "saveSettings":
+      saveSettings();
+      break;
+    case "createRR":
+      createReactionRole();
+      break;
+    case "createExistingRR":
+      createExistingReactionRole();
+      break;
+  }
 });
-
-}catch(err){
-
-console.log(err);
-
-}
-
-}
-
-// ==============================
-// DELETE REACTION ROLE
-// ==============================
-
-async function deleteReactionRole(id){
-
-if(!confirm("Delete this Reaction Role?")) return;
-
-try{
-
-await fetch(`${BACKEND}/api/reactionrole/${id}`,{
-
-method:"DELETE"
-
-});
-
-notify("✅ Deleted");
-
-loadReactionRoles(currentGuild);
-
-}catch{
-
-notify("❌ Failed");
-
-}
-
-}
-
-window.deleteReactionRole=deleteReactionRole;
-
-// ==============================
-// OWNER PANEL
-// ==============================
-
-async function loadOwnerServers(){
-
-try{
-
-const res=await fetch(
-
-`${BACKEND}/api/owner/servers`,
-
-{
-
-credentials:"include"
-
-}
-
-);
-
-const data=await res.json();
-
-if(!data.success) return;
-
-setText("ownerServers",data.total||0);
-
-const list=document.getElementById("ownerServerList");
-
-if(!list) return;
-
-list.innerHTML="";
-
-data.guilds.forEach(guild=>{
-
-const div=document.createElement("div");
-
-div.className="server-item";
-
-div.innerHTML=`
-
-<h3>${guild.name}</h3>
-
-<p>ID : ${guild.id}</p>
-
-<p>Members : ${guild.members}</p>
-
-<p>Owner : ${guild.ownerId}</p>
-
-`;
-
-list.appendChild(div);
-
-});
-
-}catch(err){
-
-console.log(err);
-
-}
-
-}
-
-// ==============================
-// EVENTS
-// ==============================
-
-document.addEventListener("change",e=>{
-
-if(e.target.id==="serverSelect"){
-
-currentGuild=e.target.value;
-
-localStorage.setItem(
-
-"selectedGuild",
-
-currentGuild
-
-);
-
-loadGuildData(currentGuild);
-
-}
-
-});
-
-document.addEventListener("click",e=>{
-
-switch(e.target.id){
-
-case"saveSettings":
-
-saveSettings();
-
-break;
-
-case"createRR":
-
-createReactionRole();
-
-break;
-
-case"createExistingRR":
-
-createExistingReactionRole();
-
-break;
-
-}
-
-});
-
-// ==============================
-// AUTO REFRESH
-// ==============================
-
-setInterval(()=>{
-
-if(currentGuild){
-
-loadReactionRoles(currentGuild);
-
-}
-
-},30000);
-
-// ==============================
 
 console.log("✅ RUDRA Dashboard Loaded");
