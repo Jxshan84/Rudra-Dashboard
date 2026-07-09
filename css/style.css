@@ -1,6 +1,7 @@
-/* =========================
-   RUDRA LOGIN - PART 1
-========================= */
+/*==================================
+RUDRA LOGIN CSS
+PART 1
+==================================*/
 
 *{
 margin:0;
@@ -12,8 +13,8 @@ font-family:'Poppins',sans-serif;
 html,body{
 width:100%;
 height:100%;
-overflow:hidden;
 background:#050505;
+overflow:hidden;
 color:#fff;
 }
 
@@ -24,20 +25,108 @@ justify-content:center;
 position:relative;
 }
 
+/* Loader */
+
+#loader{
+position:fixed;
+inset:0;
+background:#050505;
+display:flex;
+align-items:center;
+justify-content:center;
+z-index:999999;
+}
+
+.loader-logo{
+width:320px;
+text-align:center;
+}
+
+.loader-shield{
+width:120px;
+height:120px;
+margin:auto;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:65px;
+font-weight:900;
+color:#fff;
+background:linear-gradient(135deg,#ff0000,#3d0000);
+clip-path:polygon(50% 0%,90% 18%,82% 80%,50% 100%,18% 80%,10% 18%);
+box-shadow:0 0 40px red;
+animation:shieldAssemble 1s ease;
+}
+
+.loader-logo h2{
+margin-top:20px;
+font-size:40px;
+letter-spacing:8px;
+color:#ff2d2d;
+text-shadow:0 0 18px red;
+}
+
+#loaderText{
+margin-top:10px;
+font-size:15px;
+color:#d0d0d0;
+}
+
+.loader-bar{
+margin-top:20px;
+width:100%;
+height:7px;
+background:#181818;
+border-radius:50px;
+overflow:hidden;
+}
+
+.loader-bar span{
+display:block;
+height:100%;
+width:0%;
+background:linear-gradient(90deg,#ff0000,#ff6666);
+animation:loaderBar 3.5s linear forwards;
+}
+
 /* Background */
 
 .background,
 .bg{
 position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
+inset:0;
 background:
-radial-gradient(circle at top,#7a0000 0%,transparent 35%),
-radial-gradient(circle at bottom,#2b0000 0%,transparent 45%),
+radial-gradient(circle at top,#7c0000 0%,transparent 35%),
+radial-gradient(circle at bottom,#300000 0%,transparent 40%),
 #050505;
-z-index:-3;
+z-index:-5;
+}
+
+/* Police Lights */
+
+.police-light{
+position:fixed;
+top:-20%;
+width:55%;
+height:140%;
+filter:blur(120px);
+opacity:.18;
+animation-duration:2s;
+animation-iteration-count:infinite;
+animation-direction:alternate;
+pointer-events:none;
+}
+
+.red{
+left:-15%;
+background:red;
+animation-name:redFlash;
+}
+
+.blue{
+right:-15%;
+background:#0066ff;
+animation-name:blueFlash;
 }
 
 /* Particles */
@@ -46,34 +135,48 @@ z-index:-3;
 position:fixed;
 inset:0;
 background-image:
-radial-gradient(rgba(255,0,0,.7) 1px,transparent 1px),
-radial-gradient(rgba(255,255,255,.25) 1px,transparent 1px);
-background-size:90px 90px,140px 140px;
-animation:particlesMove 16s linear infinite;
+radial-gradient(red 1px,transparent 1px),
+radial-gradient(#ffffff55 1px,transparent 1px);
+background-size:90px 90px,150px 150px;
+animation:particlesMove 18s linear infinite;
 opacity:.35;
-z-index:-2;
+z-index:-4;
 }
 
-/* Main */
+/* Smoke */
 
-.login-container,
+.smoke{
+position:fixed;
+inset:-20%;
+background:
+radial-gradient(circle,
+rgba(255,255,255,.05),
+transparent 60%);
+filter:blur(80px);
+animation:smokeMove 18s ease-in-out infinite alternate;
+z-index:-3;
+}
+
+/* Login */
+
 .login-page{
 width:100%;
 display:flex;
 justify-content:center;
 align-items:center;
-padding:25px;
+padding:60px 20px;
 }
+/*==================================
+RUDRA LOGIN CSS
+PART 2
+==================================*/
 
-/* Glass Card */
-
-.glass,
 .login-card{
 
 width:100%;
 max-width:440px;
 
-padding:38px 28px;
+padding:35px 28px;
 
 border-radius:28px;
 
@@ -87,38 +190,74 @@ box-shadow:
 0 0 40px rgba(255,0,0,.35),
 inset 0 0 25px rgba(255,255,255,.04);
 
-text-align:center;
+position:relative;
+
+overflow:hidden;
 
 animation:cardShow .8s ease;
 
 }
 
-/* Logo */
+.login-card::before{
 
-.logo-circle,
+content:"";
+
+position:absolute;
+
+inset:-2px;
+
+border-radius:30px;
+
+background:linear-gradient(
+90deg,
+transparent,
+rgba(255,0,0,.7),
+transparent
+);
+
+background-size:300%;
+
+animation:borderMove 6s linear infinite;
+
+filter:blur(10px);
+
+z-index:-1;
+
+}
+
+.logo-area{
+
+text-align:center;
+
+margin-bottom:25px;
+
+}
+
 .logo-shield{
 
 width:110px;
+
 height:110px;
 
 margin:auto;
 
 display:flex;
+
 align-items:center;
+
 justify-content:center;
 
 font-size:60px;
+
 font-weight:900;
 
-background:linear-gradient(135deg,#ff1f1f,#3a0000);
+background:linear-gradient(135deg,#ff0000,#3d0000);
 
 clip-path:polygon(50% 0%,90% 18%,82% 80%,50% 100%,18% 80%,10% 18%);
 
 box-shadow:
 0 0 35px red,
-inset 0 0 18px rgba(255,255,255,.15);
-
-margin-bottom:20px;
+inset 0 0 15px rgba(255,255,255,.15);
 
 position:relative;
 
@@ -126,37 +265,39 @@ overflow:hidden;
 
 }
 
-.logo-circle::before,
-.logo-shield::before{
+.logo-shield::after{
 
 content:"";
 
 position:absolute;
 
 top:-120%;
-left:-60%;
 
-width:220%;
+left:-70%;
+
+width:240%;
+
 height:70%;
 
 background:rgba(255,255,255,.35);
 
-transform:rotate(-25deg);
+transform:rotate(-22deg);
 
-animation:shine 2.8s infinite;
+animation:shine 2.5s infinite;
 
 }
 
-.logo-circle span,
 .logo-shield span{
 
 position:relative;
 
-z-index:5;
+z-index:2;
 
 }
 
-.login-card h1{
+.logo-area h1{
+
+margin-top:18px;
 
 font-size:42px;
 
@@ -164,37 +305,27 @@ letter-spacing:8px;
 
 color:#ff3333;
 
-text-shadow:0 0 18px red;
-
-margin-bottom:8px;
+text-shadow:0 0 20px red;
 
 }
 
 .tagline{
 
-font-size:14px;
+margin-top:10px;
 
-color:#bfbfbf;
+font-size:14px;
 
 line-height:1.7;
 
-margin-bottom:28px;
+color:#c8c8c8;
 
 }
-/* =========================
-   RUDRA LOGIN - PART 2
-========================= */
 
-.login-btn,
-.discord-btn{
+.login-btn{
 
 width:100%;
 
-height:58px;
-
-border:none;
-
-border-radius:18px;
+height:56px;
 
 display:flex;
 
@@ -204,46 +335,37 @@ justify-content:center;
 
 gap:12px;
 
+background:#5865F2;
+
+border-radius:16px;
+
+text-decoration:none;
+
 font-size:17px;
 
 font-weight:700;
 
-text-decoration:none;
-
-background:linear-gradient(135deg,#5865F2,#4752C4);
-
 color:#fff;
+
+transition:.3s;
 
 box-shadow:0 0 25px rgba(88,101,242,.45);
 
-transition:.35s;
-
-cursor:pointer;
-
-margin-bottom:22px;
+margin-top:28px;
 
 }
 
-.login-btn:hover,
-.discord-btn:hover{
+.login-btn:hover{
 
-transform:translateY(-4px) scale(1.02);
+transform:translateY(-4px);
 
-box-shadow:
-0 0 35px rgba(88,101,242,.8);
+box-shadow:0 0 35px rgba(88,101,242,.75);
 
 }
-
-.login-btn i,
-.discord-btn i{
-
-font-size:22px;
-
-}
-
-/* Status */
 
 .status{
+
+margin-top:22px;
 
 display:flex;
 
@@ -253,15 +375,12 @@ align-items:center;
 
 gap:10px;
 
-margin-bottom:22px;
-
 font-size:15px;
 
-color:#cfcfcf;
+color:#d4d4d4;
 
 }
 
-.online-dot,
 .dot{
 
 width:11px;
@@ -274,614 +393,256 @@ background:#00ff88;
 
 box-shadow:0 0 18px #00ff88;
 
-animation:pulse 1.4s infinite;
+animation:pulse 1.5s infinite;
 
 }
 
-/* Divider */
+.divider{
 
-hr{
-
-border:none;
+width:100%;
 
 height:1px;
 
-background:rgba(255,255,255,.12);
+background:rgba(255,255,255,.08);
 
-margin:22px 0;
+margin:24px 0;
 
 }
-
-/* Developer */
+/*==================================
+RUDRA LOGIN CSS
+PART 3
+==================================*/
 
 .developer{
-
-text-align:left;
-
+text-align:center;
 }
 
 .developer h3{
-
-text-align:center;
-
-margin-bottom:18px;
-
 font-size:22px;
-
 color:#ff3b3b;
-
-text-shadow:0 0 10px red;
-
+text-shadow:0 0 12px red;
+margin-bottom:8px;
 }
 
-.developer p{
-
-text-align:center;
-
-margin-bottom:15px;
-
-font-weight:600;
-
+.developer h4{
+font-size:16px;
+margin-bottom:16px;
+color:#fff;
 }
 
-.item{
-
+.dev-item{
 display:flex;
-
 align-items:center;
-
+justify-content:center;
 gap:12px;
-
-padding:12px 15px;
-
-margin-bottom:12px;
-
+padding:12px 14px;
+margin:10px 0;
 border-radius:14px;
-
-background:rgba(255,255,255,.04);
-
-transition:.3s;
-
+background:rgba(255,255,255,.045);
+border:1px solid rgba(255,255,255,.06);
+transition:.25s;
+font-size:14px;
 }
 
-.item:hover{
-
-background:rgba(255,0,0,.08);
-
-transform:translateX(5px);
-
+.dev-item:hover{
+background:rgba(255,0,0,.10);
+border-color:rgba(255,0,0,.30);
+transform:translateY(-2px);
 }
 
-.item i{
-
-width:24px;
-
-text-align:center;
-
-font-size:18px;
-
+.dev-item i{
+width:22px;
 color:#ff4444;
-
+font-size:17px;
 }
 
-.item a{
-
+.dev-item a{
 color:#fff;
-
 text-decoration:none;
-
 }
 
-.item a:hover{
-
+.dev-item a:hover{
 color:#ff4444;
-
 }
 
-/* Footer */
-
-.footer{
-
-margin-top:25px;
-
+footer{
 text-align:center;
-
 font-size:13px;
-
 color:#999;
-
 line-height:1.8;
-
 }
-
-/* Animations */
-
-@keyframes pulse{
-
-0%{
-
-transform:scale(1);
-
-opacity:1;
-
-}
-
-50%{
-
-transform:scale(1.3);
-
-opacity:.7;
-
-}
-
-100%{
-
-transform:scale(1);
-
-opacity:1;
-
-}
-
-}
-
-@keyframes shine{
-
-0%{
-
-top:-120%;
-
-}
-
-60%{
-
-top:150%;
-
-}
-
-100%{
-
-top:150%;
-
-}
-
-}
-
-@keyframes particlesMove{
-
-from{
-
-background-position:0 0,0 0;
-
-}
-
-to{
-
-background-position:180px 180px,-200px 200px;
-
-}
-
-}
-
-@keyframes cardShow{
-
-from{
-
-opacity:0;
-
-transform:translateY(30px) scale(.92);
-
-}
-
-to{
-
-opacity:1;
-
-transform:translateY(0) scale(1);
-
-}
-
-}
-
-/* Mobile */
-
-@media(max-width:480px){
-
-.login-card,
-.glass{
-
-padding:26px 20px;
-
-border-radius:22px;
-
-}
-
-.login-btn,
-.discord-btn{
-
-height:54px;
-
-font-size:15px;
-
-}
-
-.logo-circle,
-.logo-shield{
-
-width:90px;
-
-height:90px;
-
-font-size:48px;
-
-}
-
-.login-card h1{
-
-font-size:32px;
-
-letter-spacing:5px;
-
-}
-
-}
-/* =========================
-   RUDRA LOGIN - PART 3
-========================= */
-
-/* Smoke */
-
-body::before{
-content:"";
-position:fixed;
-inset:-20%;
-background:
-radial-gradient(circle,#ff000020 0%,transparent 60%),
-radial-gradient(circle,#ffffff08 0%,transparent 55%);
-filter:blur(80px);
-animation:smokeMove 18s ease-in-out infinite alternate;
-z-index:-4;
-pointer-events:none;
-}
-
-/* Red Glow */
-
-body::after{
-content:"";
-position:fixed;
-left:50%;
-top:50%;
-width:700px;
-height:700px;
-transform:translate(-50%,-50%);
-background:radial-gradient(circle,
-rgba(255,0,0,.18),
-transparent 70%);
-filter:blur(80px);
-animation:redPulse 5s infinite;
-z-index:-5;
-pointer-events:none;
-}
-
-/* Floating Glow */
-
-.glass::before,
-.login-card::before{
-
-content:"";
-
-position:absolute;
-
-top:-2px;
-left:-2px;
-right:-2px;
-bottom:-2px;
-
-border-radius:30px;
-
-background:linear-gradient(
-90deg,
-transparent,
-rgba(255,0,0,.8),
-transparent
-);
-
-background-size:300%;
-
-animation:borderMove 6s linear infinite;
-
-z-index:-1;
-
-filter:blur(12px);
-
-opacity:.8;
-
-}
-
-/* Hover */
-
-.glass:hover,
-.login-card:hover{
-
-transform:translateY(-8px);
-
-box-shadow:
-0 0 60px rgba(255,0,0,.55),
-0 0 120px rgba(255,0,0,.18);
-
-transition:.4s;
-
-}
-
-/* Selection */
-
-::selection{
-
-background:#ff3333;
-color:#fff;
-
-}
-
-/* Scrollbar */
-
-::-webkit-scrollbar{
-
-width:8px;
-
-}
-
-::-webkit-scrollbar-thumb{
-
-background:#ff2222;
-border-radius:20px;
-
-}
-
-::-webkit-scrollbar-track{
-
-background:#111;
-
-}
-
-/* Animations */
-
-@keyframes smokeMove{
-
-0%{
-
-transform:translate(-40px,-20px) scale(1);
-
-}
-
-100%{
-
-transform:translate(60px,30px) scale(1.3);
-
-}
-
-}
-
-@keyframes redPulse{
-
-0%{
-
-opacity:.4;
-
-transform:translate(-50%,-50%) scale(1);
-
-}
-
-50%{
-
-opacity:.9;
-
-transform:translate(-50%,-50%) scale(1.12);
-
-}
-
-100%{
-
-opacity:.4;
-
-transform:translate(-50%,-50%) scale(1);
-
-}
-
-}
-
-@keyframes borderMove{
-
-0%{
-
-background-position:0%;
-
-}
-
-100%{
-
-background-position:300%;
-
-}
-
-}
-/* ===========================
-   RUDRA LOGIN PART 4
-=========================== */
-
-/* Mouse Glow */
 
 .cursor-glow{
 position:fixed;
 width:220px;
 height:220px;
 border-radius:50%;
-background:radial-gradient(circle,
-rgba(255,0,0,.28),
-transparent 70%);
+background:radial-gradient(circle,rgba(255,0,0,.24),transparent 70%);
 pointer-events:none;
 transform:translate(-50%,-50%);
 z-index:-1;
 filter:blur(45px);
-transition:.08s;
 }
 
-/* Glass Shine */
-
-.login-card::after,
-.glass::after{
-
-content:"";
-
-position:absolute;
-
-top:-100%;
-left:-60%;
-
-width:220%;
-height:65%;
-
-background:rgba(255,255,255,.12);
-
-transform:rotate(-22deg);
-
-animation:glassShine 5s infinite;
-
+@keyframes loaderBar{
+to{width:100%;}
 }
 
-/* Button Ripple */
-
-.login-btn,
-.discord-btn{
-
-position:relative;
-
-overflow:hidden;
-
-}
-
-.login-btn::after,
-.discord-btn::after{
-
-content:"";
-
-position:absolute;
-
-width:0;
-
-height:0;
-
-background:rgba(255,255,255,.28);
-
-border-radius:50%;
-
-left:50%;
-
-top:50%;
-
-transform:translate(-50%,-50%);
-
-transition:.5s;
-
-}
-
-.login-btn:hover::after,
-.discord-btn:hover::after{
-
-width:450px;
-
-height:450px;
-
+@keyframes shieldAssemble{
+0%{
 opacity:0;
-
+transform:scale(.3) rotate(-25deg);
+filter:blur(12px);
+}
+60%{
+opacity:1;
+transform:scale(1.15) rotate(5deg);
+filter:blur(0);
+}
+100%{
+opacity:1;
+transform:scale(1) rotate(0);
+}
 }
 
-/* Footer */
-
-.footer{
-
-margin-top:22px;
-
-padding-top:16px;
-
-border-top:1px solid rgba(255,255,255,.08);
-
+@keyframes particlesMove{
+from{background-position:0 0,0 0;}
+to{background-position:180px 180px,-200px 200px;}
 }
 
-.footer p{
-
-margin:5px 0;
-
-font-size:13px;
-
-color:#aaa;
-
+@keyframes smokeMove{
+0%{transform:translate(-50px,-20px) scale(1);}
+100%{transform:translate(60px,30px) scale(1.25);}
 }
 
-/* Mobile */
+@keyframes redFlash{
+0%{opacity:.12;}
+100%{opacity:.30;}
+}
+
+@keyframes blueFlash{
+0%{opacity:.30;}
+100%{opacity:.12;}
+}
+
+@keyframes cardShow{
+from{
+opacity:0;
+transform:translateY(28px) scale(.92);
+}
+to{
+opacity:1;
+transform:translateY(0) scale(1);
+}
+}
+
+@keyframes borderMove{
+from{background-position:0%;}
+to{background-position:300%;}
+}
+
+@keyframes shine{
+0%{top:-120%;}
+60%{top:150%;}
+100%{top:150%;}
+}
+
+@keyframes pulse{
+0%,100%{transform:scale(1);opacity:1;}
+50%{transform:scale(1.35);opacity:.65;}
+}
+/*==================================
+RUDRA LOGIN CSS
+PART 4
+==================================*/
 
 @media(max-width:768px){
 
-body{
-
+html,body{
 overflow:auto;
-
+height:auto;
+min-height:100vh;
 }
 
-.login-card,
-.glass{
+body{
+align-items:flex-start;
+}
 
+.login-page{
+padding:45px 16px;
+align-items:flex-start;
+}
+
+.login-card{
 max-width:100%;
-
-padding:24px;
-
+padding:28px 20px;
+border-radius:24px;
 }
 
-.logo-circle,
-.logo-shield{
-
-width:90px;
-
-height:90px;
-
-font-size:48px;
-
+.loader-logo{
+width:260px;
 }
 
-.login-card h1{
+.loader-shield{
+width:95px;
+height:95px;
+font-size:50px;
+}
 
+.loader-logo h2{
 font-size:30px;
+letter-spacing:6px;
+}
 
-letter-spacing:5px;
+.logo-shield{
+width:92px;
+height:92px;
+font-size:48px;
+}
 
+.logo-area h1{
+font-size:32px;
+letter-spacing:6px;
 }
 
 .tagline{
-
 font-size:13px;
+}
 
+.login-btn{
+height:54px;
+font-size:15px;
+}
+
+.dev-item{
+font-size:13px;
+padding:11px;
 }
 
 }
 
-/* Animations */
+@media(max-width:380px){
 
-@keyframes glassShine{
-
-0%{
-
-top:-100%;
-
+.login-page{
+padding:35px 12px;
 }
 
-50%{
-
-top:160%;
-
+.login-card{
+padding:24px 16px;
 }
 
-100%{
+.logo-area h1{
+font-size:28px;
+letter-spacing:4px;
+}
 
-top:160%;
+.dev-item{
+gap:8px;
+font-size:12px;
+}
 
+footer{
+font-size:12px;
 }
 
 }
