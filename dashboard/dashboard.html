@@ -1098,6 +1098,599 @@ Want faster image generation? Try RUDRA Premium.
 </div>
 
 </section>
+<!-- ===================================== -->
+<!-- PART 4 : TICKETS + GIVEAWAYS + OWNER -->
+<!-- ===================================== -->
+
+<!-- TICKETS -->
+
+<section class="page" id="tickets">
+
+<div class="page-header">
+
+<div>
+
+<h2>🎫 Ticket System</h2>
+
+<p>Manage support tickets.</p>
+
+</div>
+
+<div class="header-actions">
+
+<button id="createTicketPanel">
+
+➕ Create Panel
+
+</button>
+
+<button id="saveTickets">
+
+💾 Save
+
+</button>
+
+</div>
+
+</div>
+
+<div class="settings-grid">
+
+<div class="setting-card">
+
+<label>
+
+Ticket Channel
+
+</label>
+
+<select id="ticketChannel">
+
+</select>
+
+</div>
+
+<div class="setting-card">
+
+<label>
+
+Ticket Category
+
+</label>
+
+<select id="ticketCategory">
+
+</select>
+
+</div>
+
+<div class="setting-card">
+
+<label>
+
+Support Role
+
+</label>
+
+<select id="ticketSupportRole">
+
+</select>
+
+</div>
+
+<div class="setting-card">
+
+<label>
+
+Logs Channel
+
+</label>
+
+<select id="ticketLogs">
+
+</select>
+
+</div>
+
+<div class="setting-card">
+
+<label>
+
+Maximum Tickets
+
+</label>
+
+<select id="ticketLimit">
+
+<option>1</option>
+
+<option>2</option>
+
+<option>3</option>
+
+<option>5</option>
+
+</select>
+
+</div>
+
+<div class="setting-card">
+
+<label>
+
+Transcript
+
+</label>
+
+<select id="ticketTranscript">
+
+<option value="true">
+
+Enabled
+
+</option>
+
+<option value="false">
+
+Disabled
+
+</option>
+
+</select>
+
+</div>
+
+<div class="setting-card full-width">
+
+<label>
+
+Panel Title
+
+</label>
+
+<input
+
+id="ticketTitle"
+
+placeholder="Support Center"
+
+>
+
+</div>
+
+<div class="setting-card full-width">
+
+<label>
+
+Panel Description
+
+</label>
+
+<textarea id="ticketDescription">
+
+Click below to create a ticket.
+
+</textarea>
+
+</div>
+
+<div class="setting-card">
+
+<label>
+
+Button Name
+
+</label>
+
+<input
+
+id="ticketButtonText"
+
+placeholder="Create Ticket"
+
+>
+
+</div>
+
+<div class="setting-card">
+
+<label>
+
+Button Emoji
+
+</label>
+
+<input
+
+id="ticketButtonEmoji"
+
+placeholder="🎫"
+
+>
+
+</div>
+
+<div class="setting-card full-width">
+
+<label>
+
+Ticket Message
+
+</label>
+
+<textarea id="ticketOpenMessage">
+
+Hello {user}, support will help you soon.
+
+</textarea>
+
+</div>
+
+<div class="setting-card full-width">
+
+<label>
+
+Variables
+
+</label>
+
+<div class="variables">
+
+<span>{user}</span>
+
+<span>{username}</span>
+
+<span>{ticketid}</span>
+
+<span>{server}</span>
+
+<span>{support}</span>
+
+</div>
+
+</div>
+
+<div class="setting-card full-width">
+
+<label>
+
+Created Tickets
+
+</label>
+
+<div id="ticketList">
+
+Loading...
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- GIVEAWAYS -->
+
+<section class="page" id="giveaway">
+
+<div class="page-header">
+
+<div>
+
+<h2>🎁 Giveaway System</h2>
+
+<p>Create giveaways for your server.</p>
+
+</div>
+
+<div class="header-actions">
+
+<button id="createGiveaway">
+
+➕ Start Giveaway
+
+</button>
+
+<button id="saveGiveaway">
+
+💾 Save
+
+</button>
+
+</div>
+
+</div>
+
+<div class="settings-grid">
+
+<div class="setting-card">
+
+<label>
+
+Giveaway Channel
+
+</label>
+
+<select id="giveawayChannel">
+
+</select>
+
+</div>
+
+<div class="setting-card">
+
+<label>
+
+Required Role
+
+</label>
+
+<select id="giveawayRole">
+
+</select>
+
+</div>
+
+<div class="setting-card full-width">
+
+<label>
+
+Prize
+
+</label>
+
+<input
+
+id="giveawayPrize"
+
+placeholder="Nitro"
+
+>
+
+</div>
+
+<div class="setting-card">
+
+<label>
+
+Duration
+
+</label>
+
+<input
+
+id="giveawayDuration"
+
+placeholder="1d"
+
+>
+
+</div>
+
+<div class="setting-card">
+
+<label>
+
+Winners
+
+</label>
+
+<input
+
+id="giveawayWinners"
+
+type="number"
+
+value="1"
+
+>
+
+</div>
+
+<div class="setting-card">
+
+<label>
+
+Bonus Entries
+
+</label>
+
+<input
+
+id="bonusEntries"
+
+type="number"
+
+value="0"
+
+>
+
+</div>
+
+<div class="setting-card full-width">
+
+<label>
+
+Giveaway Message
+
+</label>
+
+<textarea id="giveawayMessage">
+
+🎉 Giveaway for {prize}
+
+Hosted by {host}
+
+</textarea>
+
+</div>
+
+<div class="setting-card full-width">
+
+<label>
+
+Variables
+
+</label>
+
+<div class="variables">
+
+<span>{prize}</span>
+
+<span>{host}</span>
+
+<span>{winners}</span>
+
+<span>{server}</span>
+
+<span>{endtime}</span>
+
+</div>
+
+</div>
+
+<div class="setting-card full-width">
+
+<label>
+
+Active Giveaways
+
+</label>
+
+<div id="giveawayList">
+
+Loading...
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- OWNER PANEL -->
+
+<section class="page owner-only" id="owner">
+
+<div class="page-header">
+
+<div>
+
+<h2>
+
+👑 Owner Panel
+
+</h2>
+
+<p>
+
+Owner-only controls.
+
+</p>
+
+</div>
+
+</div>
+
+<div class="stats-grid">
+
+<div class="card">
+
+<h3>
+
+Total Servers
+
+</h3>
+
+<h1 id="ownerServers">
+
+0
+
+</h1>
+
+</div>
+
+<div class="card">
+
+<h3>
+
+Premium Servers
+
+</h3>
+
+<h1 id="premiumServers">
+
+0
+
+</h1>
+
+</div>
+
+<div class="card">
+
+<h3>
+
+Users
+
+</h3>
+
+<h1 id="ownerUsers">
+
+0
+
+</h1>
+
+</div>
+
+<div class="card">
+
+<h3>
+
+Bot Status
+
+</h3>
+
+<h1 id="ownerBotStatus">
+
+Offline
+
+</h1>
+
+</div>
+
+</div>
+
+<div class="settings-grid">
+
+<div class="setting-card full-width">
+
+<label>
+
+Broadcast Message
+
+</label>
+
+<textarea id="broadcastMessage">
+
+</textarea>
+
+</div>
+
+<div class="setting-card">
+
+<button id="sendBroadcast">
+
+📢 Send Broadcast
+
+</button>
+
+</div>
+
+</div>
+
+</section>
 
 </div>
 
