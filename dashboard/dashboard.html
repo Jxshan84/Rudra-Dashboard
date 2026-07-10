@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
 <meta charset="UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>RUDRA Dashboard</title>
@@ -9,643 +12,1090 @@
 <link rel="stylesheet" href="dashboard.css">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
+
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
 </head>
 
 <body>
 
-<!-- PREMIUM LOADER -->
-<div id="loader">
-
-  <div class="loader-particles"></div>
-
-  <div class="loader-core">
-
-    <div class="loader-shield">
-      <span>R</span>
-    </div>
-
-    <h2>RUDRA</h2>
-
-    <p id="loaderText">
-      Initializing RUDRA...
-    </p>
-
-    <div class="loader-bar">
-      <span></span>
-    </div>
-
-  </div>
-
-</div>
-
 <div class="background"></div>
+
+<div class="particles"></div>
 
 <div class="dashboard">
 
-<!-- SIDEBAR -->
 <aside class="sidebar">
 
-  <div class="logo">
-    <div class="logo-mark">R</div>
-    <h2>RUDRA</h2>
-  </div>
+<div class="logo-box">
 
-  <nav>
+<img src="../images/rudra-logo.png" class="sidebar-logo">
 
-    <button data-page="dashboard">
-      <i class="fa-solid fa-house"></i>
-      Dashboard
-    </button>
+<h2>RUDRA</h2>
 
-    <button data-page="server">
-      <i class="fa-solid fa-server"></i>
-      Server Settings
-    </button>
+<p>Discord Management</p>
 
-    <button data-page="reaction">
-      <i class="fa-solid fa-face-smile"></i>
-      Reaction Roles
-    </button>
+</div>
 
-    <button data-page="moderation">
-      <i class="fa-solid fa-shield-halved"></i>
-      Moderation
-    </button>
+<nav class="sidebar-menu">
 
-    <button data-page="automod">
-      <i class="fa-solid fa-robot"></i>
-      AutoMod
-    </button>
+<button data-page="dashboard">
 
-    <button data-page="economy">
-      <i class="fa-solid fa-coins"></i>
-      Economy
-    </button>
+<i class="fa-solid fa-house"></i>
 
-    <button data-page="tickets">
-      <i class="fa-solid fa-ticket"></i>
-      Tickets
-    </button>
+<span>Dashboard</span>
 
-    <button data-page="giveaway">
-      <i class="fa-solid fa-gift"></i>
-      Giveaways
-    </button>
+</button>
 
-    <button data-page="premium">
-      <i class="fa-solid fa-crown"></i>
-      Premium
-    </button>
+<button data-page="server">
 
-    <button data-page="settings">
-      <i class="fa-solid fa-gear"></i>
-      Settings
-    </button>
+<i class="fa-solid fa-server"></i>
 
-    <button class="owner-only" data-page="owner" style="display:none;">
-      👑 Owner Panel
-    </button>
+<span>Server</span>
 
-    <button class="owner-only" data-page="owner-servers" style="display:none;">
-      🌐 All Servers
-    </button>
+</button>
 
-    <button class="owner-only" data-page="owner-premium" style="display:none;">
-      💎 Premium Manager
-    </button>
+<button data-page="welcome">
 
-    <button class="owner-only" data-page="owner-redeem" style="display:none;">
-      🎁 Redeem Codes
-    </button>
+<i class="fa-solid fa-door-open"></i>
 
-    <button class="owner-only" data-page="owner-broadcast" style="display:none;">
-      📢 Broadcast
-    </button>
+<span>Welcome</span>
 
-  </nav>
+</button>
+
+<button data-page="leave">
+
+<i class="fa-solid fa-right-from-bracket"></i>
+
+<span>Leave</span>
+
+</button>
+
+<button data-page="reaction">
+
+<i class="fa-solid fa-face-smile"></i>
+
+<span>Reaction Roles</span>
+
+</button>
+
+<button data-page="moderation">
+
+<i class="fa-solid fa-shield-halved"></i>
+
+<span>Moderation</span>
+
+</button>
+
+<button data-page="automod">
+
+<i class="fa-solid fa-robot"></i>
+
+<span>AutoMod</span>
+
+</button>
+
+<button data-page="recording">
+
+<i class="fa-solid fa-microphone"></i>
+
+<span>Recording</span>
+
+</button>
+
+<button data-page="ai">
+
+<i class="fa-solid fa-brain"></i>
+
+<span>AI Chat</span>
+
+</button>
+<button data-page="economy">
+
+<i class="fa-solid fa-coins"></i>
+
+<span>Economy</span>
+
+</button>
+
+<button data-page="tickets">
+
+<i class="fa-solid fa-ticket"></i>
+
+<span>Tickets</span>
+
+</button>
+
+<button data-page="giveaway">
+
+<i class="fa-solid fa-gift"></i>
+
+<span>Giveaways</span>
+
+</button>
+
+<button data-page="premium">
+
+<i class="fa-solid fa-crown"></i>
+
+<span>Premium</span>
+
+</button>
+
+<button data-page="settings">
+
+<i class="fa-solid fa-gear"></i>
+
+<span>Settings</span>
+
+</button>
+
+<button class="owner-only" data-page="owner">
+
+<i class="fa-solid fa-user-shield"></i>
+
+<span>Owner Panel</span>
+
+</button>
+
+</nav>
 
 </aside>
 
-<!-- CONTENT -->
 <main class="content">
 
-<header>
+<header class="topbar">
 
-  <div>
-    <h1>RUDRA Dashboard</h1>
-    <p class="sub-title">Manage your Discord server with RUDRA</p>
-  </div>
+<div>
 
-  <div class="profile">
-    <img id="avatar" src="https://cdn.discordapp.com/embed/avatars/0.png">
-    <span id="username">Loading...</span>
-  </div>
+<h1>RUDRA Dashboard</h1>
+
+<p>
+Manage your Discord server
+</p>
+
+</div>
+
+<div class="profile-box">
+
+<img id="avatar"
+src="https://cdn.discordapp.com/embed/avatars/0.png">
+
+<div>
+
+<h3 id="username">
+
+Loading...
+
+</h3>
+
+<select id="serverSelect">
+
+<option>
+
+Loading Servers...
+
+</option>
+
+</select>
+
+</div>
+
+</div>
 
 </header>
 
-<div class="server-select">
-  <label>Select Server</label>
-  <select id="serverSelect">
-    <option value="">Loading servers...</option>
-  </select>
-</div>
-
 <div id="pages">
 
-<!-- DASHBOARD -->
-<section class="page active" id="dashboard">
+<section
+class="page active"
+id="dashboard">
 
-  <div class="cards">
+<div class="stats-grid">
 
-    <div class="card">
-      <h3>Status</h3>
-      <h1 id="status">Loading...</h1>
-    </div>
+<div class="card">
 
-    <div class="card">
-      <h3>Ping</h3>
-      <h1 id="ping">0 ms</h1>
-    </div>
+<h4>Status</h4>
 
-    <div class="card">
-      <h3>Servers</h3>
-      <h1 id="servers">0</h1>
-    </div>
+<h2 id="status">
 
-    <div class="card">
-      <h3>Users</h3>
-      <h1 id="users">0</h1>
-    </div>
+Loading...
 
-    <div class="card">
-      <h3>Commands</h3>
-      <h1 id="commands">0</h1>
-    </div>
+</h2>
 
-    <div class="card">
-      <h3>RAM</h3>
-      <h1 id="ram">0 MB</h1>
-    </div>
+</div>
 
-    <div class="card">
-      <h3>Node.js</h3>
-      <h1 id="node">Loading...</h1>
-    </div>
+<div class="card">
 
-    <div class="card">
-      <h3>Database</h3>
-      <h1 id="database">Checking...</h1>
-    </div>
+<h4>Ping</h4>
 
-  </div>
+<h2 id="ping">
+
+0 ms
+
+</h2>
+
+</div>
+
+<div class="card">
+
+<h4>Servers</h4>
+
+<h2 id="servers">
+
+0
+
+</h2>
+
+</div>
+
+<div class="card">
+
+<h4>Users</h4>
+
+<h2 id="users">
+
+0
+
+</h2>
+
+</div>
+<div class="card">
+
+<h4>Commands</h4>
+
+<h2 id="commands">
+
+0
+
+</h2>
+
+</div>
+
+<div class="card">
+
+<h4>RAM</h4>
+
+<h2 id="ram">
+
+0 MB
+
+</h2>
+
+</div>
+
+<div class="card">
+
+<h4>Node.js</h4>
+
+<h2 id="node">
+
+Loading...
+
+</h2>
+
+</div>
+
+<div class="card">
+
+<h4>Database</h4>
+
+<h2 id="database">
+
+Checking...
+
+</h2>
+
+</div>
+
+</div>
 
 </section>
 
-<!-- SERVER SETTINGS -->
 <section class="page" id="server">
 
-  <h2>⚙️ Server Settings</h2>
+<h2>⚙️ Server Settings</h2>
 
-  <div class="settings-grid">
+<div class="settings-grid">
 
-    <div class="setting">
-      <label>Prefix</label>
-      <input id="prefix" placeholder="Example: !">
-    </div>
+<div class="setting">
 
-    <div class="setting">
-      <label>Welcome Channel</label>
-      <select id="welcomeChannel"></select>
-    </div>
+<label>Prefixes</label>
 
-    <div class="setting">
-      <label>Leave Channel</label>
-      <select id="leaveChannel"></select>
-    </div>
+<input
+id="prefix"
+placeholder="Example: ! ? $">
 
-    <div class="setting">
-      <label>Mod Log Channel</label>
-      <select id="modLogChannel"></select>
-    </div>
+</div>
 
-    <div class="setting">
-      <label>Ticket Category</label>
-      <select id="ticketCategory"></select>
-    </div>
+<div class="setting">
 
-    <div class="setting">
-      <label>Member Auto Role</label>
-      <select id="autoRole"></select>
-    </div>
+<label>Welcome Channel</label>
 
-    <div class="setting">
-      <label>Verification Role</label>
-      <select id="verifyRole"></select>
-    </div>
+<select id="welcomeChannel"></select>
 
-    <div class="setting">
-      <label>Anti Link</label>
-      <select id="antiLink">
-        <option value="false">Disabled</option>
-        <option value="true">Enabled</option>
-      </select>
-    </div>
+</div>
 
-    <div class="setting">
-      <label>Anti Bot</label>
-      <select id="antiBot">
-        <option value="false">Disabled</option>
-        <option value="true">Enabled</option>
-      </select>
-    </div>
+<div class="setting">
 
-    <button id="saveSettings">
-      💾 Save Settings
-    </button>
+<label>Leave Channel</label>
 
-  </div>
+<select id="leaveChannel"></select>
+
+</div>
+
+<div class="setting">
+
+<label>Log Channel</label>
+
+<select id="modLogChannel"></select>
+
+</div>
+
+<div class="setting">
+
+<label>Auto Role</label>
+
+<select id="autoRole"></select>
+
+</div>
+
+<div class="setting">
+
+<label>Verify Role</label>
+
+<select id="verifyRole"></select>
+
+</div>
+
+<div class="setting">
+
+<label>AI Cooldown</label>
+
+<select id="aiCooldown">
+
+<option>3 Hours</option>
+
+<option>6 Hours</option>
+
+<option>12 Hours</option>
+
+</select>
+
+</div>
+
+<div class="setting">
+
+<label>AI Images Per Day</label>
+
+<select id="aiImages">
+
+<option>5</option>
+
+<option>10</option>
+
+<option>15</option>
+
+</select>
+
+</div>
+
+<button id="saveSettings">
+
+💾 Save Settings
+
+</button>
+
+</div>
 
 </section>
-
-<!-- REACTION ROLES -->
 <section class="page" id="reaction">
 
-  <h2>😀 Reaction Roles</h2>
+<h2>😀 Reaction Roles</h2>
 
-  <div class="reaction-layout">
+<div class="reaction-layout">
 
-    <div class="reaction-panel">
+<div class="panel">
 
-      <h3>Create New Reaction Role Message</h3>
+<h3>Create Reaction Role</h3>
 
-      <div class="settings-grid">
+<div class="setting">
 
-        <div class="setting">
-          <label>Channel</label>
-          <select id="rrChannel"></select>
-        </div>
+<label>Channel</label>
 
-        <div class="setting">
-          <label>Role</label>
-          <select id="rrRole"></select>
-        </div>
+<select id="rrChannel"></select>
 
-        <div class="setting">
-          <label>Emoji</label>
-          <input id="rrEmoji" placeholder="Example: ✅">
-        </div>
+</div>
 
-        <div class="setting">
-          <label>Title</label>
-          <input id="rrTitle" placeholder="Choose your roles">
-        </div>
+<div class="setting">
 
-        <div class="setting full">
-          <label>Description</label>
-          <textarea id="rrDescription" placeholder="React below to receive your role."></textarea>
-        </div>
+<label>Role</label>
 
-        <div class="setting">
-          <label>Reaction Type</label>
-          <select id="rrType">
-            <option value="normal">Normal</option>
-            <option value="unique">Unique</option>
-            <option value="verify">Verify</option>
-            <option value="drop">Drop</option>
-            <option value="reversed">Reversed</option>
-            <option value="limit">Limit</option>
-            <option value="binding">Binding</option>
-            <option value="temp">Temp 🔒 Premium</option>
-          </select>
-        </div>
+<select id="rrRole"></select>
 
-        <button id="createRR">
-          ➕ Create Reaction Role
-        </button>
+</div>
 
-      </div>
+<div class="setting">
 
-    </div>
+<label>Emoji</label>
 
-    <div class="reaction-panel">
+<input id="rrEmoji" placeholder="✅">
 
-      <h3>Add To Existing Message</h3>
+</div>
 
-      <div class="settings-grid">
+<div class="setting">
 
-        <div class="setting">
-          <label>Channel</label>
-          <select id="rrExistingChannel"></select>
-        </div>
+<label>Title</label>
 
-        <div class="setting">
-          <label>Message ID</label>
-          <input id="rrExistingMessageId" placeholder="Paste message ID">
-        </div>
+<input id="rrTitle" placeholder="Choose your role">
 
-        <div class="setting">
-          <label>Role</label>
-          <select id="rrExistingRole"></select>
-        </div>
+</div>
 
-        <div class="setting">
-          <label>Emoji</label>
-          <input id="rrExistingEmoji" placeholder="Example: 🎮">
-        </div>
+<div class="setting">
 
-        <button id="createExistingRR">
-          🔗 Add Reaction Role
-        </button>
+<label>Description</label>
 
-      </div>
+<textarea id="rrDescription"></textarea>
 
-    </div>
+</div>
 
-    <div class="reaction-panel preview-panel">
+<div class="setting">
 
-      <h3>Live Preview</h3>
+<label>Reaction Type</label>
 
-      <div class="embed-preview">
+<select id="rrType">
 
-        <h4 id="previewTitle">Choose your roles</h4>
+<option value="normal">Normal</option>
 
-        <p id="previewDescription">
-          React below to receive your role.
-        </p>
+<option value="unique">Unique</option>
 
-        <div class="preview-row">
-          <span id="previewEmoji">✅</span>
-          <span id="previewRole">Selected Role</span>
-        </div>
+<option value="verify">Verify</option>
 
-      </div>
+<option value="limit">Limit</option>
 
-    </div>
+<option value="binding">Binding</option>
 
-  </div>
+</select>
 
-  <div class="reaction-panel">
-    <h3>Reaction Role List</h3>
-    <div id="reactionRoleList" class="server-list">
-      No reaction roles loaded.
-    </div>
-  </div>
+</div>
+
+<button id="createRR">
+
+➕ Create
+
+</button>
+
+</div>
+
+<div class="panel">
+
+<h3>Reaction Role List</h3>
+
+<div id="reactionRoleList">
+
+Loading...
+
+</div>
+
+</div>
+
+</div>
 
 </section>
 
-<!-- MODERATION -->
+<section class="page" id="welcome">
+
+<h2>🎉 Welcome</h2>
+
+<div class="settings-grid">
+
+<div class="setting">
+
+<label>Welcome Message</label>
+
+<textarea id="welcomeMessage">
+
+Welcome {user} to {server}
+
+</textarea>
+
+</div>
+
+<div class="setting">
+
+<label>Variables</label>
+
+<div class="variables">
+
+{user} {server} {membercount}
+
+</div>
+
+</div>
+
+<div class="setting">
+
+<label>Background</label>
+
+<select id="welcomeBackground">
+
+<option>Sky + Birds</option>
+
+<option>Forest</option>
+
+<option>City</option>
+
+<option>Mountains</option>
+
+</select>
+
+</div>
+
+<button id="saveWelcome">
+
+💾 Save Welcome
+
+</button>
+
+</div>
+
+</section>
+<section class="page" id="leave">
+
+<h2>👋 Leave System</h2>
+
+<div class="settings-grid">
+
+<div class="setting">
+
+<label>Leave Message</label>
+
+<textarea id="leaveMessage">
+
+Goodbye {user}
+
+</textarea>
+
+</div>
+
+<div class="setting">
+
+<label>Variables</label>
+
+<div class="variables">
+
+{user} {server} {membercount}
+
+</div>
+
+</div>
+
+<button id="saveLeave">
+
+💾 Save Leave
+
+</button>
+
+</div>
+
+</section>
+
 <section class="page" id="moderation">
 
-  <h2>🛡️ Moderation</h2>
+<h2>🛡️ Moderation</h2>
 
-  <div class="cards">
+<div class="stats-grid">
 
-    <div class="card">
-      <h3>Mute System</h3>
-      <p>/setupmute, /mute, /unmute</p>
-    </div>
+<div class="card">
 
-    <div class="card">
-      <h3>Channel Control</h3>
-      <p>/lock, /unlock, /purge</p>
-    </div>
+<h3>Warn System</h3>
 
-    <div class="card">
-      <h3>Jail System</h3>
-      <p>Coming next</p>
-    </div>
+<p>/warn /warnings /clearwarnings</p>
 
-  </div>
+</div>
+
+<div class="card">
+
+<h3>Timeout</h3>
+
+<p>/timeout /untimeout</p>
+
+</div>
+
+<div class="card">
+
+<h3>Ban System</h3>
+
+<p>/ban /unban</p>
+
+</div>
+
+<div class="card">
+
+<h3>Messages</h3>
+
+<p>/purge /slowmode</p>
+
+</div>
+
+</div>
 
 </section>
 
-<!-- AUTOMOD -->
 <section class="page" id="automod">
 
-  <h2>🤖 AutoMod</h2>
+<h2>🤖 AutoMod</h2>
 
-  <div class="cards">
+<div class="settings-grid">
 
-    <div class="card">
-      <h3>Anti Link</h3>
-      <p>Block invite and spam links.</p>
-    </div>
+<div class="setting">
 
-    <div class="card">
-      <h3>Anti Bot</h3>
-      <p>Control bot joins.</p>
-    </div>
+<label>Anti Link</label>
 
-    <div class="card">
-      <h3>Anti Spam</h3>
-      <p>Coming soon.</p>
-    </div>
+<select id="antiLink">
 
-  </div>
+<option value="true">Enabled</option>
+
+<option value="false">Disabled</option>
+
+</select>
+
+</div>
+
+<div class="setting">
+
+<label>Anti Spam</label>
+
+<select id="antiSpam">
+
+<option value="true">Enabled</option>
+
+<option value="false">Disabled</option>
+
+</select>
+
+</div>
+
+<div class="setting">
+
+<label>Anti Bot</label>
+
+<select id="antiBot">
+
+<option value="true">Enabled</option>
+
+<option value="false">Disabled</option>
+
+</select>
+
+</div>
+
+<div class="setting">
+
+<label>Punishment</label>
+
+<select id="punishment">
+
+<option>warn</option>
+
+<option>timeout</option>
+
+<option>kick</option>
+
+<option>ban</option>
+
+</select>
+
+</div>
+
+<button id="saveAutomod">
+
+💾 Save AutoMod
+
+</button>
+
+</div>
+
+</section>
+<section class="page" id="recording">
+
+<h2>🎙️ Recording</h2>
+
+<div class="stats-grid">
+
+<div class="card">
+
+<h3>Start Recording</h3>
+
+<p>/record start</p>
+
+</div>
+
+<div class="card">
+
+<h3>Stop Recording</h3>
+
+<p>/record stop</p>
+
+</div>
+
+<div class="card">
+
+<h3>Status</h3>
+
+<p>/record status</p>
+
+</div>
+
+<div class="card">
+
+<h3>Download</h3>
+
+<p>/record download</p>
+
+</div>
+
+</div>
 
 </section>
 
-<!-- ECONOMY -->
+<section class="page" id="ai">
+
+<h2>🤖 RUDRA AI</h2>
+
+<div class="settings-grid">
+
+<div class="setting">
+
+<label>AI Chat Cooldown</label>
+
+<select id="aiChatCooldown">
+
+<option>3 Hours</option>
+
+<option>4 Hours</option>
+
+<option>6 Hours</option>
+
+</select>
+
+</div>
+
+<div class="setting">
+
+<label>Free Images Per Day</label>
+
+<input
+type="text"
+value="5 Images"
+disabled>
+
+</div>
+
+<div class="setting">
+
+<label>Image Cooldown</label>
+
+<input
+type="text"
+value="2 Minutes"
+disabled>
+
+</div>
+
+<div class="setting">
+
+<label>Limit Message</label>
+
+<textarea id="limitMessage">
+Your free image limit has been reached.
+
+You can generate images again after 3–4 hours.
+
+Want faster image generation? Try RUDRA Premium.
+</textarea>
+
+</div>
+
+<button id="saveAI">
+
+💾 Save AI Settings
+
+</button>
+
+</div>
+
+</section>
+
 <section class="page" id="economy">
 
-  <h2>💰 Economy</h2>
+<h2>💰 Economy</h2>
 
-  <div class="cards">
+<div class="stats-grid">
 
-    <div class="card">
-      <h3>Coins</h3>
-      <p>Balance, daily, shop and inventory.</p>
-    </div>
+<div class="card">
 
-    <div class="card">
-      <h3>Redeem</h3>
-      <p>Reward code system.</p>
-    </div>
+<h3>Balance</h3>
 
-    <div class="card">
-      <h3>Premium Gems</h3>
-      <p>Premium currency system coming soon.</p>
-    </div>
+<p>/balance</p>
 
-  </div>
+</div>
+
+<div class="card">
+
+<h3>Daily</h3>
+
+<p>/daily</p>
+
+</div>
+
+<div class="card">
+
+<h3>Inventory</h3>
+
+<p>/inventory</p>
+
+</div>
+
+<div class="card">
+
+<h3>Shop</h3>
+
+<p>/shop</p>
+
+</div>
+
+</div>
 
 </section>
-
-<!-- TICKETS -->
 <section class="page" id="tickets">
 
-  <h2>🎫 Tickets</h2>
+<h2>🎫 Tickets</h2>
 
-  <div class="cards">
+<div class="stats-grid">
 
-    <div class="card">
-      <h3>Ticket Panel</h3>
-      <p>Coming soon.</p>
-    </div>
+<div class="card">
 
-  </div>
+<h3>Create Ticket</h3>
+
+<p>/ticket setup</p>
+
+</div>
+
+<div class="card">
+
+<h3>Close Ticket</h3>
+
+<p>/ticket close</p>
+
+</div>
+
+<div class="card">
+
+<h3>Add User</h3>
+
+<p>/ticket add</p>
+
+</div>
+
+<div class="card">
+
+<h3>Remove User</h3>
+
+<p>/ticket remove</p>
+
+</div>
+
+</div>
 
 </section>
 
-<!-- GIVEAWAYS -->
 <section class="page" id="giveaway">
 
-  <h2>🎁 Giveaways</h2>
+<h2>🎁 Giveaways</h2>
 
-  <div class="cards">
+<div class="stats-grid">
 
-    <div class="card">
-      <h3>Giveaway Manager</h3>
-      <p>Coming soon.</p>
-    </div>
+<div class="card">
 
-  </div>
+<h3>Create Giveaway</h3>
+
+<p>/giveaway create</p>
+
+</div>
+
+<div class="card">
+
+<h3>End Giveaway</h3>
+
+<p>/giveaway end</p>
+
+</div>
+
+<div class="card">
+
+<h3>Reroll Giveaway</h3>
+
+<p>/giveaway reroll</p>
+
+</div>
+
+<div class="card">
+
+<h3>Delete Giveaway</h3>
+
+<p>/giveaway delete</p>
+
+</div>
+
+</div>
 
 </section>
 
-<!-- PREMIUM -->
 <section class="page" id="premium">
 
-  <h2>👑 RUDRA Premium</h2>
+<h2>👑 RUDRA Premium</h2>
 
-  <div class="cards">
+<div class="stats-grid">
 
-    <div class="card">
-      <h3>Free</h3>
-      <p>Basic moderation, economy and dashboard access.</p>
-    </div>
+<div class="card">
 
-    <div class="card premium-card">
-      <h3>Silver</h3>
-      <p>Advanced reaction roles, more limits and support.</p>
-    </div>
+<h3>Free Plan</h3>
 
-    <div class="card premium-card">
-      <h3>Gold</h3>
-      <p>Voice roles, sticky messages, advanced logs and automation.</p>
-    </div>
+<p>Basic moderation and AI access.</p>
 
-    <div class="card premium-card">
-      <h3>Diamond</h3>
-      <p>All premium features, priority support and early access.</p>
-    </div>
+</div>
 
-  </div>
+<div class="card">
+
+<h3>Silver</h3>
+
+<p>Advanced reaction roles and tickets.</p>
+
+</div>
+
+<div class="card">
+
+<h3>Gold</h3>
+
+<p>Voice recording and automation.</p>
+
+</div>
+
+<div class="card">
+
+<h3>Diamond</h3>
+
+<p>All features unlocked.</p>
+
+</div>
+
+</div>
 
 </section>
 
-<!-- SETTINGS -->
 <section class="page" id="settings">
 
-  <h2>⚙️ Dashboard Settings</h2>
+<h2>⚙️ Dashboard Settings</h2>
 
-  <div class="cards">
+<div class="settings-grid">
 
-    <div class="card">
-      <h3>General</h3>
-      <p>Prefix, logs and dashboard settings are handled here.</p>
-    </div>
+<div class="setting">
 
-  </div>
+<label>Theme</label>
+
+<select id="theme">
+
+<option>Dark</option>
+
+<option>Red</option>
+
+</select>
+
+</div>
+
+<div class="setting">
+
+<label>Language</label>
+
+<select id="language">
+
+<option>English</option>
+
+<option>Hindi</option>
+
+</select>
+
+</div>
+
+<button id="saveDashboardSettings">
+
+💾 Save Settings
+
+</button>
+
+</div>
 
 </section>
-
-<!-- OWNER PANEL -->
 <section class="page owner-page" id="owner">
 
-  <h2>👑 Owner Panel</h2>
+<h2>👑 Owner Panel</h2>
 
-  <div class="cards">
+<div class="stats-grid">
 
-    <div class="card">
-      <h3>Total Servers</h3>
-      <h1 id="ownerServers">0</h1>
-    </div>
+<div class="card">
 
-    <div class="card">
-      <h3>Premium Servers</h3>
-      <h1 id="premiumServers">0</h1>
-    </div>
+<h3>Total Servers</h3>
 
-    <div class="card">
-      <h3>Redeem Codes</h3>
-      <h1 id="redeemCodes">0</h1>
-    </div>
+<h1 id="ownerServers">0</h1>
 
-    <div class="card">
-      <h3>Bot Status</h3>
-      <h1 id="ownerBotStatus">Loading...</h1>
-    </div>
+</div>
 
-  </div>
+<div class="card">
 
-</section>
+<h3>Premium Servers</h3>
 
-<section class="page owner-page" id="owner-servers">
+<h1 id="premiumServers">0</h1>
 
-  <h2>🌐 All Servers</h2>
+</div>
 
-  <div id="ownerServerList" class="server-list">
-    Loading servers...
-  </div>
+<div class="card">
 
-</section>
+<h3>Total Users</h3>
 
-<section class="page owner-page" id="owner-premium">
+<h1 id="ownerUsers">0</h1>
 
-  <h2>💎 Premium Manager</h2>
+</div>
 
-  <div class="cards">
+<div class="card">
 
-    <div class="card">
-      <h3>Add Premium</h3>
-      <p>Coming soon.</p>
-    </div>
+<h3>Bot Status</h3>
 
-    <div class="card">
-      <h3>Remove Premium</h3>
-      <p>Coming soon.</p>
-    </div>
+<h1 id="ownerBotStatus">Loading...</h1>
 
-  </div>
+</div>
 
-</section>
+</div>
 
-<section class="page owner-page" id="owner-redeem">
+<div class="settings-grid">
 
-  <h2>🎁 Redeem Code Manager</h2>
+<div class="setting">
 
-  <div class="cards">
+<label>Broadcast Message</label>
 
-    <div class="card">
-      <h3>Create Codes</h3>
-      <p>Coming soon.</p>
-    </div>
+<textarea id="broadcastMessage"></textarea>
 
-    <div class="card">
-      <h3>Redeem Logs</h3>
-      <p>Coming soon.</p>
-    </div>
+</div>
 
-  </div>
+<button id="sendBroadcast">
 
-</section>
+📢 Send Broadcast
 
-<section class="page owner-page" id="owner-broadcast">
+</button>
 
-  <h2>📢 Broadcast</h2>
-
-  <div class="cards">
-
-    <div class="card">
-      <h3>Global Announcement</h3>
-      <p>Coming soon.</p>
-    </div>
-
-  </div>
+</div>
 
 </section>
 
@@ -658,4 +1108,5 @@
 <script src="dashboard.js"></script>
 
 </body>
+
 </html>
