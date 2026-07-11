@@ -2022,3 +2022,21 @@ select option{
   border-left:
     4px solid #ffb020;
 }
+@media (max-width: 700px) {
+
+  .stats-grid,
+  .settings-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .content {
+    width: 100%;
+    margin-left: 0;
+    padding: 12px;
+  }
+
+  .card,
+  .setting-card {
+    width: 100%;
+  }
+}
