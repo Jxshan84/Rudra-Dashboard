@@ -775,6 +775,93 @@ async function finishRecording(guildId) {
     uploadedFiles
   };
 }
+/* =========================================================
+   STOP SESSION
+========================================================= */
+
+async function stopSession(
+  interaction,
+  session
+) {
+  if (session.stopping) {
+    return interaction.reply({
+      content:
+        "⚠️ Recording is already stopping.",
+      ephemeral: true
+    }).catch(() => {});
+  }
+
+  await interaction.deferReply({
+    ephemeral: true
+  });
+
+  const result =
+    await finishRecording(
+      interaction.guild.id
+    );
+
+  if (!result) {
+    return interaction.editReply(
+      "❌ Recording session not found."
+    );
+  }
+
+  if (result.panelMessage) {
+    await result.panelMessage.edit({
+      embeds: [
+        createPanelEmbed(
+          result,
+          true
+        )
+      ],
+
+      components: [
+        createPanelButtons(
+          result,
+          true
+        )
+      ]
+    }).catch(() => {});
+  }
+
+  if (
+    !result.uploadedFiles ||
+    result.uploadedFiles.length === 0
+  ) {
+    return interaction.editReply(
+      "⚠️ Recording stopped, but no audio was captured."
+    );
+  }
+
+  try {
+    await interaction.channel.send({
+      content:
+        `✅ **Recording Completed**\n` +
+        `🆔 Recording ID: \`${result.recordingId}\`\n` +
+        `🎙️ Channel: <#${result.channelId}>\n` +
+        `👥 Files: ${result.uploadedFiles.length}`,
+
+      files:
+        result.uploadedFiles.slice(
+          0,
+          10
+        )
+    });
+
+    return interaction.editReply(
+      "✅ Recording stopped successfully."
+    );
+  } catch (error) {
+    console.error(
+      "Upload error:",
+      error
+    );
+
+    return interaction.editReply(
+      "⚠️ Recording saved but upload failed."
+    );
+  }
+}
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("record")
