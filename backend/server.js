@@ -938,45 +938,33 @@ try {
     });  
   }  
 
-  const command =  
-    client.prefixCommands.get(  
-      commandName  
-    );  
+  const command =
+  client.prefixCommands.get(
+    commandName
+  );
 
-  if (!command) {  
-    return message.reply(  
-      `❌ Prefix command \`${commandName}\` not found.`  
-    );  
-  }  
-
-  await command.prefixExecute({  
-    message,  
-
-    args,  
-
-    client,  
-
-    prefix:  
-      usedPrefix,  
-
-    settings  
-  });  
-} catch (error) {  
-  console.error(  
-    "❌ Prefix command error:",  
-    error  
-  );  
-
-  await message  
-    .reply(  
-      "❌ Prefix command failed."  
-    )  
-    .catch(() => {});  
+if (!command) {
+  return message.reply(
+    `❌ Prefix command \`${commandName}\` not found.`
+  );
 }
 
+if (
+  typeof command.prefixExecute ===
+  "function"
+) {
+  await command.prefixExecute({
+    message,
+    args,
+    client,
+    prefix: usedPrefix,
+    settings
+  });
+} else {
+  return message.reply(
+    `❌ ${commandName} does not support prefix commands yet.`
+  );
 }
-);
-
 /* =========================================================
 PROCESS ERRORS
 ========================================================= */
