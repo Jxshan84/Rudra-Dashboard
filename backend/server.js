@@ -768,203 +768,340 @@ try {
 );
 
 /* =========================================================
-PREFIX COMMAND HANDLER
+   PREFIX COMMAND HANDLER
 ========================================================= */
 
 client.on(
-Events.MessageCreate,
+  Events.MessageCreate,
+  async message => {
+    if (
+      message.author.bot ||
+      !message.guild ||
+      !message.content
+    ) {
+      return;
+    }
 
-async message => {
-if (
-message.author.bot ||
-!message.guild ||
-!message.content
-) {
-return;
-}
+    try {
+      let settings =
+        await GuildSettings.findOne({
+          guildId: message.guild.id
+        });
 
-try {  
-  let settings =  
-    await GuildSettings.findOne({  
-      guildId:  
-        message.guild.id  
-    });  
+      if (!settings) {
+        settings =
+          await GuildSettings.create({
+            guildId: message.guild.id,
+            prefixes: ["!"],
+            defaultPrefix: "!"
+          });
+      }
 
-  if (!settings) {  
-    settings =  
-      await GuildSettings.create({  
-        guildId:  
-          message.guild.id,  
+      let prefixes =
+        Array.isArray(settings.prefixes)
+          ? settings.prefixes
+          : [];
 
-        prefixes: ["!"],  
+      if (!prefixes.length) {
+        prefixes = [
+          settings.defaultPrefix ||
+          settings.prefix ||
+          "!"
+        ];
+      }
 
-        defaultPrefix:  
-          "!"  
-      });  
-  }  
+      prefixes = prefixes
+        .map(prefix =>
+          String(prefix).trim()
+        )
+        .filter(Boolean)
+        .sort(
+          (a, b) =>
+            b.length - a.length
+        );
 
-  let prefixes =  
-    Array.isArray(  
-      settings.prefixes  
-    )  
-      ? settings.prefixes  
-      : [];  
+      const usedPrefix =
+        prefixes.find(prefix =>
+          message.content.startsWith(
+            prefix
+          )
+        );
 
-  if (  
-    !prefixes.length  
-  ) {  
-    prefixes = [  
-      settings.defaultPrefix ||  
-      settings.prefix ||  
-      "!"  
-    ];  
-  }  
+      if (!usedPrefix) {
+        return;
+      }
 
-  prefixes =  
-    prefixes  
-      .map(prefix =>  
-        String(prefix)  
-          .trim()  
-      )  
-      .filter(Boolean)  
-      .sort(  
-        (a, b) =>  
-          b.length -  
-          a.length  
-      );  
+      const content =
+        message.content
+          .slice(usedPrefix.length)
+          .trim();
 
-  const usedPrefix =  
-    prefixes.find(prefix =>  
-      message.content  
-        .startsWith(prefix)  
-    );  
+      if (!content) {
+        return;
+      }
 
-  if (!usedPrefix) {  
-    return;  
-  }  
+      const args =
+        content.split(/\s+/);
 
-  const content =  
-    message.content  
-      .slice(  
-        usedPrefix.length  
-      )  
-      .trim();  
+      const commandName =
+        args.shift().toLowerCase();
 
-  if (!content) {  
-    return;  
-  }  
+      /* =====================================================
+         BUILT-IN PING
+      ===================================================== */
 
-  const args =  
-    content.split(/\s+/);  
+      if (commandName === "ping") {
+        return message.reply(
+          `🏓 Pong! **${client.ws.ping || 0}ms**`
+        );
+      }
 
-  const commandName =  
-    args  
-      .shift()  
-      .toLowerCase();  
+      /* =====================================================
+         BUILT-IN PREFIX
+      ===================================================== */
 
-  /* BUILT-IN PING */  
+      if (
+        commandName === "prefix" ||
+        commandName === "prefixes"
+      ) {
+        return message.reply(
+          `⚙️ **RUDRA Prefixes**\n` +
+          `${prefixes
+            .map(
+              prefix =>
+                `\`${prefix}\``
+            )
+            .join(" ")}\n\n` +
+          `Default: \`${
+            settings.defaultPrefix ||
+            prefixes[0]
+          }\``
+        );
+      }
 
-  if (  
-    commandName ===  
-    "ping"  
-  ) {  
-    return message.reply(  
-      `🏓 Pong! **${client.ws.ping || 0}ms**`  
-    );  
-  }  
+      /* =====================================================
+         BUILT-IN HELP
+      ===================================================== */
 
-  /* BUILT-IN PREFIX */  
+      if (commandName === "help") {
+        const commandNames = [
+          ...new Set(
+            client.commands.map(
+              command =>
+                command.data.name
+            )
+          )
+        ].sort();
 
-  if (  
-    commandName ===  
-      "prefix" ||  
-    commandName ===  
-      "prefixes"  
-  ) {  
-    return message.reply(  
-      `⚙️ **RUDRA Prefixes**\n` +  
-      `${prefixes  
-        .map(  
-          prefix =>  
-            `\`${prefix}\``  
-        )  
-        .join(" ")}\n\n` +  
-      `Default: \`${  
-        settings  
-          .defaultPrefix ||  
-        prefixes[0]  
-      }\``  
-    );  
-  }  
+        const visibleCommands =
+          commandNames
+            .slice(0, 40)
+            .map(
+              name =>
+                `\`/${name}\``
+            )
+            .join(" ");
 
-  /* BUILT-IN HELP */  
+        return message.reply({
+          content:
+            `🛡️ **RUDRA Help**\n\n` +
+            `**Server prefixes:** ${prefixes
+              .map(
+                prefix =>
+                  `\`${prefix}\``
+              )
+              .join(" ")}\n\n` +
+            `**Commands:**\n${visibleCommands}\n\n` +
+            "Use `/help` for the complete help menu."
+        });
+      }
 
-  if (  
-    commandName ===  
-    "help"  
-  ) {  
-    const commandNames = [  
-      ...new Set(  
-        client.commands.map(  
-          command =>  
-            command.data.name  
-        )  
-      )  
-    ].sort();  
+      const command =
+        client.prefixCommands.get(
+          commandName
+        ) ||
+        client.commands.get(
+          commandName
+        );
 
-    const visibleCommands =  
-      commandNames  
-        .slice(0, 40)  
-        .map(  
-          name =>  
-            `\`/${name}\``  
-        )  
-        .join(" ");  
+      if (!command) {
+        return message.reply(
+          `❌ Prefix command \`${commandName}\` not found.`
+        );
+      }
 
-    return message.reply({  
-      content:  
-        `🛡️ **RUDRA Help**\n\n` +  
+      console.log(
+        `⚡ ${usedPrefix}${commandName} | ${message.author.tag}`
+      );
 
-        `**Server prefixes:** ${prefixes  
-          .map(  
-            prefix =>  
-              `\`${prefix}\``  
-          )  
-          .join(" ")}\n\n` +  
+      if (
+        typeof command.prefixExecute ===
+        "function"
+      ) {
+        await command.prefixExecute({
+          message,
+          args,
+          client,
+          prefix: usedPrefix,
+          settings
+        });
 
-        `**Slash commands:**\n${visibleCommands}\n\n` +  
+        return;
+      }
 
-        "Use `/help` for the complete help menu."  
-    });  
-  }  
+      const firstNumber =
+        args.find(argument =>
+          !Number.isNaN(
+            Number(argument)
+          )
+        );
 
-  const command =
-  client.prefixCommands.get(
-    commandName
-  );
+      const reasonArgs =
+        args.filter(argument =>
+          !/^<@!?\d+>$/.test(argument)
+        );
 
-if (!command) {
-  return message.reply(
-    `❌ Prefix command \`${commandName}\` not found.`
-  );
-}
+            const normalizeReply = data => {
+        if (typeof data === "string") {
+          return {
+            content: data
+          };
+        }
 
-if (
-  typeof command.prefixExecute ===
-  "function"
-) {
-  await command.prefixExecute({
-    message,
-    args,
-    client,
-    prefix: usedPrefix,
-    settings
-  });
-} else {
-  return message.reply(
-    `❌ ${commandName} does not support prefix commands yet.`
-  );
-}
+        const payload = {
+          ...data
+        };
+
+        delete payload.ephemeral;
+        delete payload.flags;
+        delete payload.fetchReply;
+
+        return payload;
+      };
+
+      const fakeInteraction = {
+        client,
+
+        commandName:
+          command.data.name,
+
+        guild: message.guild,
+
+        guildId:
+          message.guild.id,
+
+        member:
+          message.member,
+
+        user:
+          message.author,
+
+        channel:
+          message.channel,
+
+        channelId:
+          message.channel.id,
+
+        deferred: false,
+
+        replied: false,
+
+        options: {
+          getUser: () =>
+            message.mentions.users.first(),
+
+          getMember: () =>
+            message.mentions.members.first(),
+
+          getString: optionName => {
+            if (
+              optionName === "reason"
+            ) {
+              return (
+                reasonArgs.join(" ") ||
+                null
+              );
+            }
+
+            return (
+              args.join(" ") ||
+              null
+            );
+          },
+
+          getInteger: () =>
+            firstNumber
+              ? Number(firstNumber)
+              : null,
+
+          getNumber: () =>
+            firstNumber
+              ? Number(firstNumber)
+              : null,
+
+          getBoolean: () =>
+            false,
+
+          getChannel: () =>
+            message.mentions.channels.first(),
+
+          getRole: () =>
+            message.mentions.roles.first(),
+
+          getMentionable: () =>
+            message.mentions.members.first() ||
+            message.mentions.roles.first(),
+
+          getSubcommand: () =>
+            args[0] || null
+        },
+
+        reply: async data => {
+          fakeInteraction.replied = true;
+
+          return message.reply(
+            normalizeReply(data)
+          );
+        },
+
+        deferReply: async () => {
+          fakeInteraction.deferred = true;
+        },
+
+        editReply: async data => {
+          fakeInteraction.replied = true;
+
+          return message.reply(
+            normalizeReply(data)
+          );
+        },
+
+        followUp: async data => {
+          return message.reply(
+            normalizeReply(data)
+          );
+        }
+      };
+
+      await command.execute(
+        fakeInteraction,
+        client
+      );
+
+    } catch (error) {
+      console.error(
+        "❌ Prefix command error:",
+        error
+      );
+
+      await message
+        .reply(
+          "❌ Prefix command failed."
+        )
+        .catch(() => {});
+    }
+  }
+);
 /* =========================================================
 PROCESS ERRORS
 ========================================================= */
