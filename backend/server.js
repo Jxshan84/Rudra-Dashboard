@@ -193,7 +193,7 @@ function loadCommands(directory) {
 
 if (!fs.existsSync(directory)) {
 console.log(
-⚠️ Commands folder missing: ${directory}
+  `⚠️ Commands folder missing: ${directory}`
 );
 
 return;
