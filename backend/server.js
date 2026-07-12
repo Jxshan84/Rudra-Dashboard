@@ -10,800 +10,1062 @@ const passport = require("passport");
 const DiscordStrategy = require("passport-discord").Strategy;
 
 const {
-  Client,
-  GatewayIntentBits,
-  Partials,
-  Collection,
-  REST,
-  Routes,
-  Events,
-  MessageFlags,
-  ActivityType
+Client,
+GatewayIntentBits,
+Partials,
+Collection,
+REST,
+Routes,
+Events,
+MessageFlags,
+ActivityType
 } = require("discord.js");
 
 const GuildSettings = require("./models/GuildSettings");
 
 const app = express();
+
 const PORT = process.env.PORT || 3000;
 
 /* =========================================================
-   EXPRESS
+EXPRESS
+========================================================= */
+
+app.use(
+cors({
+origin: true,
+credentials: true
+})
+);
+
+app.use(express.json());
+
+app.use(
+express.urlencoded({
+extended: true
+})
+);
+
+app.use(
+express.static(
+path.join(__dirname, "../")
+)
+);
+
+/* =========================================================
+SESSION
 ========================================================= */
 
 app.set("trust proxy", 1);
 
 app.use(
-  cors({
-    origin: true,
-    credentials: true
-  })
-);
+session({
+secret:
+process.env.SESSION_SECRET ||
+"rudra-dashboard-secret",
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, "../")));
+resave: false,  
 
-/* =========================================================
-   SESSION + PASSPORT
-========================================================= */
+saveUninitialized: false,  
 
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET || "rudra-session-secret",
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000
-    }
-  })
+cookie: {  
+  maxAge:  
+    7 *  
+    24 *  
+    60 *  
+    60 *  
+    1000,  
+
+  httpOnly: true,  
+
+  sameSite: "lax",  
+
+  secure:  
+    process.env.NODE_ENV ===  
+    "production"  
+}
+
+})
 );
 
 app.use(passport.initialize());
 app.use(passport.session());
 
-passport.serializeUser((user, done) => {
-  done(null, user);
-});
+passport.serializeUser(
+(user, done) => {
+done(null, user);
+}
+);
 
-passport.deserializeUser((user, done) => {
-  done(null, user);
-});
-
-passport.use(
-  new DiscordStrategy(
-    {
-      clientID: process.env.CLIENT_ID,
-      clientSecret: process.env.CLIENT_SECRET,
-      callbackURL: process.env.REDIRECT_URI,
-      scope: ["identify", "guilds"]
-    },
-    (accessToken, refreshToken, profile, done) => {
-      return done(null, profile);
-    }
-  )
+passport.deserializeUser(
+(user, done) => {
+done(null, user);
+}
 );
 
 /* =========================================================
-   DISCORD CLIENT
+DISCORD OAUTH
+========================================================= */
+
+passport.use(
+new DiscordStrategy(
+{
+clientID:
+process.env.CLIENT_ID,
+
+clientSecret:  
+    process.env.CLIENT_SECRET,  
+
+  callbackURL:  
+    process.env.REDIRECT_URI,  
+
+  scope: [  
+    "identify",  
+    "guilds"  
+  ]  
+},  
+
+(  
+  accessToken,  
+  refreshToken,  
+  profile,  
+  done  
+) => {  
+  return done(  
+    null,  
+    profile  
+  );  
+}
+
+)
+);
+
+/* =========================================================
+DISCORD CLIENT
 ========================================================= */
 
 const client = new Client({
-  intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMembers,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent,
-    GatewayIntentBits.GuildMessageReactions,
-    GatewayIntentBits.GuildVoiceStates,
-    GatewayIntentBits.GuildModeration,
-    GatewayIntentBits.DirectMessages
-  ],
-  partials: [
-    Partials.Channel,
-    Partials.Message,
-    Partials.Reaction,
-    Partials.User,
-    Partials.GuildMember
-  ]
+intents: [
+GatewayIntentBits.Guilds,
+
+GatewayIntentBits.GuildMembers,  
+
+GatewayIntentBits.GuildMessages,  
+
+GatewayIntentBits  
+  .GuildMessageReactions,  
+
+GatewayIntentBits  
+  .MessageContent,  
+
+GatewayIntentBits  
+  .GuildVoiceStates
+
+],
+
+partials: [
+Partials.Message,
+
+Partials.Channel,  
+
+Partials.Reaction,  
+
+Partials.User,  
+
+Partials.GuildMember
+
+]
 });
 
-client.commands = new Collection();
-client.prefixCommands = new Collection();
+client.commands =
+new Collection();
 
-const slashCommands = [];
+client.prefixCommands =
+new Collection();
 
 /* =========================================================
-   COMMAND LOADER
+COMMAND LOADER
 ========================================================= */
+
+const slashCommandMap = new Map();
 
 function loadCommands(directory) {
-  if (!fs.existsSync(directory)) {
-    console.log(`⚠️ Commands folder not found: ${directory}`);
-    return;
-  }
 
-  const entries = fs.readdirSync(directory, {
-    withFileTypes: true
-  });
+if (!fs.existsSync(directory)) {
+console.log(
+⚠️ Commands folder missing: ${directory}
+);
 
-  for (const entry of entries) {
-    const fullPath = path.join(directory, entry.name);
+return;
 
-    if (entry.isDirectory()) {
-      loadCommands(fullPath);
-      continue;
-    }
-
-    if (!entry.isFile() || !entry.name.endsWith(".js")) {
-      continue;
-    }
-
-    try {
-      const command = require(fullPath);
-
-      if (
-        !command.data ||
-        !command.data.name ||
-        typeof command.data.toJSON !== "function" ||
-        typeof command.execute !== "function"
-      ) {
-        console.log(`⚠️ Invalid command skipped: ${fullPath}`);
-        continue;
-      }
-
-      const commandName = command.data.name.toLowerCase();
-
-      client.commands.set(commandName, command);
-      client.prefixCommands.set(commandName, command);
-
-      slashCommands.push(command.data.toJSON());
-
-      if (Array.isArray(command.aliases)) {
-        for (const alias of command.aliases) {
-          if (
-            typeof alias === "string" &&
-            alias.trim()
-          ) {
-            client.prefixCommands.set(
-              alias.trim().toLowerCase(),
-              command
-            );
-          }
-        }
-      }
-
-      console.log(`✅ Command loaded: ${commandName}`);
-    } catch (error) {
-      console.error(`❌ Failed to load command: ${fullPath}`);
-      console.error(error);
-    }
-  }
 }
 
-loadCommands(path.join(__dirname, "commands"));
-
-/* =========================================================
-   REACTION ROLE EVENT
-========================================================= */
-
-const reactionRoleEvent = path.join(
-  __dirname,
-  "events",
-  "reactionRole.js"
+const entries = fs.readdirSync(
+directory,
+{
+withFileTypes: true
+}
 );
 
-if (fs.existsSync(reactionRoleEvent)) {
-  try {
-    require(reactionRoleEvent)(client);
-    console.log("✅ Reaction role event loaded");
-  } catch (error) {
-    console.error(
-      "❌ Reaction role event failed to load:",
-      error
-    );
-  }
+for (const entry of entries) {
+
+const fullPath = path.join(  
+  directory,  
+  entry.name  
+);  
+
+if (entry.isDirectory()) {  
+  loadCommands(fullPath);  
+  continue;  
+}  
+
+if (  
+  !entry.name.endsWith(".js")  
+) {  
+  continue;  
+}  
+
+try {  
+
+  delete require.cache[  
+    require.resolve(fullPath)  
+  ];  
+
+  const command =  
+    require(fullPath);  
+
+  if (  
+    !command.data ||  
+    typeof command.execute !==  
+      "function"  
+  ) {  
+    console.log(  
+      `⚠️ Invalid command skipped: ${fullPath}`  
+    );  
+
+    continue;  
+  }  
+
+  const commandName =  
+    command.data.name;  
+
+  if (!commandName) {  
+    console.log(  
+      `⚠️ Command without name skipped: ${fullPath}`  
+    );  
+
+    continue;  
+  }  
+
+  if (  
+    client.commands.has(  
+      commandName  
+    )  
+  ) {  
+    console.log(  
+      `⚠️ Duplicate command skipped: ${commandName}`  
+    );  
+
+    continue;  
+  }  
+
+  client.commands.set(  
+    commandName,  
+    command  
+  );  
+
+  slashCommandMap.set(  
+    commandName,  
+    command.data.toJSON()  
+  );  
+
+  client.prefixCommands.set(  
+    commandName.toLowerCase(),  
+    command  
+  );  
+
+  if (  
+    Array.isArray(  
+      command.aliases  
+    )  
+  ) {  
+    for (  
+      const alias of command.aliases  
+    ) {  
+      client.prefixCommands.set(  
+        String(alias)  
+          .toLowerCase(),  
+        command  
+      );  
+    }  
+  }  
+
+  console.log(  
+    `✅ Loaded command: ${commandName}`  
+  );  
+
+} catch (error) {  
+
+  console.error(  
+    `❌ Failed loading command ${fullPath}:`,  
+    error  
+  );  
+
+}
+
+}
+}
+
+loadCommands(
+path.join(
+__dirname,
+"commands"
+)
+);
+
+console.log(
+✅ Total slash commands loaded: ${client.commands.size}
+);
+
+console.log(
+✅ Total prefix commands loaded: ${client.prefixCommands.size}
+);
+
+/* =========================================================
+EVENTS
+========================================================= */
+
+const reactionRoleEvent =
+path.join(
+__dirname,
+"events",
+"reactionRole.js"
+);
+
+if (
+fs.existsSync(
+reactionRoleEvent
+)
+) {
+try {
+require(
+reactionRoleEvent
+)(client);
+
+console.log(  
+  "✅ Reaction role event loaded"  
+);
+
+} catch (error) {
+console.error(
+"❌ Reaction role event error:",
+error
+);
+}
 }
 
 /* =========================================================
-   DATABASE
-========================================================= */
-
-async function connectDatabase() {
-  if (!process.env.MONGODB_URI) {
-    throw new Error(
-      "MONGODB_URI is missing in environment variables."
-    );
-  }
-
-  await mongoose.connect(process.env.MONGODB_URI);
-
-  console.log("✅ MongoDB connected");
-}
-
-mongoose.connection.on("error", error => {
-  console.error("❌ MongoDB error:", error);
-});
-
-mongoose.connection.on("disconnected", () => {
-  console.log("⚠️ MongoDB disconnected");
-});
-
-/* =========================================================
-   DASHBOARD API ROUTES
+API ROUTES
 ========================================================= */
 
 app.use(
-  "/api/dashboard",
-  require("./routes/dashboard")(client)
+"/api/dashboard",
+require(
+"./routes/dashboard"
+)(client)
 );
 
 app.use(
-  "/api/guild",
-  require("./routes/guild")(client)
+"/api/guild",
+require(
+"./routes/guild"
+)(client)
 );
 
 app.use(
-  "/api/owner",
-  require("./routes/owner")(client)
+"/api/owner",
+require(
+"./routes/owner"
+)(client)
 );
 
 app.use(
-  "/api/reactionrole",
-  require("./routes/reactionrole")(client)
+"/api/reactionrole",
+require(
+"./routes/reactionrole"
+)(client)
 );
 
 /* =========================================================
-   HEALTH ROUTE
-========================================================= */
-
-app.get("/health", (req, res) => {
-  const users = client.guilds.cache.reduce(
-    (total, guild) =>
-      total + (guild.memberCount || 0),
-    0
-  );
-
-  res.status(200).json({
-    status: "ok",
-    bot: client.user ? "online" : "starting",
-    ping:
-      client.ws.ping >= 0
-        ? client.ws.ping
-        : 0,
-    servers: client.guilds.cache.size,
-    users,
-    commands: client.commands.size,
-    database:
-      mongoose.connection.readyState === 1
-        ? "connected"
-        : "disconnected"
-  });
-});
-
-/* =========================================================
-   DISCORD LOGIN
+HEALTH
 ========================================================= */
 
 app.get(
-  "/auth/discord",
-  passport.authenticate("discord", {
-    scope: ["identify", "guilds"]
-  })
+"/health",
+(req, res) => {
+const totalUsers =
+client.guilds.cache.reduce(
+(
+total,
+guild
+) =>
+total +
+(
+guild.memberCount ||
+0
+),
+
+0  
+  );  
+
+return res.json({  
+  status:  
+    client.isReady()  
+      ? "Online"  
+      : "Offline",  
+
+  bot:  
+    client.user?.tag ||  
+    "Starting...",  
+
+  ping:  
+    client.ws.ping ||  
+    0,  
+
+  servers:  
+    client.guilds.cache.size,  
+
+  users:  
+    totalUsers,  
+
+  commands:  
+    client.commands.size,  
+
+  database:  
+    mongoose.connection  
+      .readyState === 1  
+      ? "Connected"  
+      : "Disconnected"  
+});
+
+}
+);
+
+/* =========================================================
+OAUTH ROUTES
+========================================================= */
+
+app.get(
+"/auth/discord",
+
+passport.authenticate(
+"discord"
+)
 );
 
 app.get(
-  "/auth/discord/callback",
-  passport.authenticate("discord", {
-    failureRedirect: "/"
-  }),
-  (req, res) => {
-    res.redirect("/dashboard/dashboard.html");
-  }
+"/auth/discord/callback",
+
+passport.authenticate(
+"discord",
+{
+failureRedirect: "/"
+}
+),
+
+(req, res) => {
+return res.redirect(
+"/dashboard/dashboard.html"
+);
+}
+);
+
+app.get(
+"/api/user",
+(req, res) => {
+if (!req.user) {
+return res
+.status(401)
+.json({
+loggedIn: false
+});
+}
+
+return res.json({  
+  loggedIn: true,  
+
+  owner:  
+    req.user.id ===  
+    process.env.OWNER_ID,  
+
+  id:  
+    req.user.id,  
+
+  username:  
+    req.user.username,  
+
+  discriminator:  
+    req.user.discriminator,  
+
+  avatar:  
+    req.user.avatar,  
+
+  guilds:  
+    req.user.guilds ||  
+    []  
+});
+
+}
+);
+
+app.get(
+"/api/guilds",
+(req, res) => {
+if (!req.user) {
+return res
+.status(401)
+.json({
+success: false,
+
+message:  
+        "Not logged in"  
+    });  
+}  
+
+const manageableGuilds =  
+  (  
+    req.user.guilds ||  
+    []  
+  ).filter(guild => {  
+    try {  
+      const permissions =  
+        BigInt(  
+          guild.permissions ||  
+          "0"  
+        );  
+
+      const manageGuild =  
+        BigInt(0x20);  
+
+      const administrator =  
+        BigInt(0x8);  
+
+      return (  
+        (  
+          permissions &  
+          manageGuild  
+        ) ===  
+          manageGuild ||  
+
+        (  
+          permissions &  
+          administrator  
+        ) ===  
+          administrator  
+      );  
+    } catch {  
+      return false;  
+    }  
+  });  
+
+return res.json(  
+  manageableGuilds  
+);
+
+}
+);
+
+app.get(
+"/logout",
+(req, res) => {
+req.logout(error => {
+if (error) {
+console.error(
+"Logout error:",
+error
+);
+}
+
+return res.redirect("/");  
+});
+
+}
 );
 
 /* =========================================================
-   USER API
+REGISTER SLASH COMMANDS
 ========================================================= */
 
-app.get("/api/user", (req, res) => {
-  if (!req.user) {
-    return res.status(401).json({
-      loggedIn: false
-    });
-  }
+async function registerSlashCommands() {
+const slashCommandsJSON =
+Array.from(
+slashCommandMap.values()
+);
 
-  return res.json({
-    loggedIn: true,
-    owner:
-      req.user.id === process.env.OWNER_ID,
-    id: req.user.id,
-    username: req.user.username,
-    discriminator: req.user.discriminator,
-    avatar: req.user.avatar,
-    guilds: req.user.guilds || []
-  });
-});
+const rest =
+new REST({
+version: "10"
+}).setToken(
+process.env.TOKEN
+);
 
-/* =========================================================
-   MANAGEABLE GUILDS
-========================================================= */
+try {
+if (
+process.env.GUILD_ID
+) {
+await rest.put(
+Routes
+.applicationGuildCommands(
+process.env.CLIENT_ID,
+process.env.GUILD_ID
+),
 
-app.get("/api/guilds", (req, res) => {
-  if (!req.user) {
-    return res.status(401).json({
-      error: "Unauthorized"
-    });
-  }
+{  
+      body:  
+        slashCommandsJSON  
+    }  
+  );  
 
-  const guilds = (req.user.guilds || [])
-    .filter(guild => {
-      if (guild.owner) {
-        return true;
-      }
+  console.log(  
+    `✅ Registered ${slashCommandsJSON.length} guild slash commands`  
+  );  
 
-      try {
-        const permissions = BigInt(
-          guild.permissions || "0"
-        );
+  return;  
+}  
 
-        return (
-          (permissions & 32n) === 32n
-        );
-      } catch {
-        return false;
-      }
-    })
-    .map(guild => ({
-      id: guild.id,
-      name: guild.name,
-      icon: guild.icon,
-      owner: Boolean(guild.owner),
-      permissions: guild.permissions,
-      botAdded: client.guilds.cache.has(
-        guild.id
-      )
-    }));
+await rest.put(  
+  Routes.applicationCommands(  
+    process.env.CLIENT_ID  
+  ),  
 
-  return res.json(guilds);
-});
+  {  
+    body:  
+      slashCommandsJSON  
+  }  
+);  
+
+console.log(  
+  `✅ Registered ${slashCommandsJSON.length} global slash commands`  
+);
+
+} catch (error) {
+console.error(
+"❌ Slash command registration error:",
+error
+);
+}
+}
 
 /* =========================================================
-   LOGOUT
-========================================================= */
-
-app.get("/logout", (req, res, next) => {
-  req.logout(error => {
-    if (error) {
-      return next(error);
-    }
-
-    req.session.destroy(() => {
-      res.clearCookie("connect.sid");
-      res.redirect("/");
-    });
-  });
-});
-
-/* =========================================================
-   READY + SLASH COMMAND REGISTRATION
+CLIENT READY
 ========================================================= */
 
 client.once(
-  Events.ClientReady,
-  async readyClient => {
-    console.log(
-      `✅ ${readyClient.user.tag} is online`
-    );
+Events.ClientReady,
 
-    readyClient.user.setPresence({
-      status: "online",
-      activities: [
-        {
-          name: "/help | Rudra",
-          type: ActivityType.Watching
-        }
-      ]
-    });
+async readyClient => {
+console.log(
+✅ Logged in as ${readyClient.user.tag}
+);
 
-    try {
-      const rest = new REST({
-        version: "10"
-      }).setToken(process.env.TOKEN);
+readyClient.user.setActivity(  
+  "/help | RUDRA",  
 
-      console.log(
-        `🔄 Registering ${slashCommands.length} slash commands...`
-      );
+  {  
+    type:  
+      ActivityType.Watching  
+  }  
+);  
 
-      await rest.put(
-        Routes.applicationCommands(
-          process.env.CLIENT_ID
-        ),
-        {
-          body: slashCommands
-        }
-      );
+await registerSlashCommands();
 
-      console.log(
-        `✅ Registered ${slashCommands.length} slash commands`
-      );
-    } catch (error) {
-      console.error(
-        "❌ Slash command registration failed:",
-        error
-      );
-    }
-  }
+}
 );
 
 /* =========================================================
-   SLASH COMMAND HANDLER
+SLASH COMMAND HANDLER
 ========================================================= */
 
 client.on(
-  Events.InteractionCreate,
-  async interaction => {
-    if (!interaction.isChatInputCommand()) {
-      return;
-    }
+Events.InteractionCreate,
 
-    const command = client.commands.get(
-      interaction.commandName.toLowerCase()
-    );
+async interaction => {
+if (
+!interaction
+.isChatInputCommand()
+) {
+return;
+}
 
-    if (!command) {
-      return interaction.reply({
-        content:
-          "❌ This command was not found.",
-        flags: MessageFlags.Ephemeral
-      });
-    }
+const command =  
+  client.commands.get(  
+    interaction.commandName  
+  );  
 
-    try {
-      console.log(
-        `⚡ /${interaction.commandName} used by ${interaction.user.tag}`
-      );
+console.log(  
+  `⚡ /${interaction.commandName} | ${interaction.user.tag}`  
+);  
 
-      await command.execute(
-        interaction,
-        client
-      );
-    } catch (error) {
-      console.error(
-        `❌ Error in /${interaction.commandName}:`,
-        error
-      );
+if (!command) {  
+  return interaction  
+    .reply({  
+      content:  
+        "❌ This command is not loaded in RUDRA.",  
 
-      const response = {
-        content:
-          "❌ There was an error while running this command.",
-        flags: MessageFlags.Ephemeral
-      };
+      flags:  
+        MessageFlags.Ephemeral  
+    })  
+    .catch(() => {});  
+}  
 
-      if (
-        interaction.replied ||
-        interaction.deferred
-      ) {
-        await interaction
-          .followUp(response)
-          .catch(() => null);
-      } else {
-        await interaction
-          .reply(response)
-          .catch(() => null);
-      }
-    }
-  }
+try {  
+  await command.execute(  
+    interaction,  
+    client  
+  );  
+} catch (error) {  
+  console.error(  
+    `❌ Command error /${interaction.commandName}:`,  
+    error  
+  );  
+
+  const errorMessage = {  
+    content:  
+      "❌ Command failed. Check bot permissions and Render logs.",  
+
+    flags:  
+      MessageFlags.Ephemeral  
+  };  
+
+  try {  
+    if (  
+      interaction.deferred  
+    ) {  
+      await interaction.editReply({  
+        content:  
+          errorMessage.content  
+      });  
+    } else if (  
+      interaction.replied  
+    ) {  
+      await interaction.followUp(  
+        errorMessage  
+      );  
+    } else {  
+      await interaction.reply(  
+        errorMessage  
+      );  
+    }  
+  } catch (  
+    replyError  
+  ) {  
+    console.error(  
+      `❌ Error response failed /${interaction.commandName}:`,  
+      replyError  
+    );  
+  }  
+}
+
+}
 );
 
 /* =========================================================
-   PREFIX COMMAND HANDLER
+PREFIX COMMAND HANDLER
 ========================================================= */
 
 client.on(
-  Events.MessageCreate,
-  async message => {
-    if (
-      !message.guild ||
-      message.author.bot
-    ) {
-      return;
-    }
+Events.MessageCreate,
 
-    try {
-      let settings =
-        await GuildSettings.findOne({
-          guildId: message.guild.id
-        });
+async message => {
+if (
+message.author.bot ||
+!message.guild ||
+!message.content
+) {
+return;
+}
 
-      if (!settings) {
-        settings =
-          await GuildSettings.create({
-            guildId: message.guild.id,
-            prefixes: ["!"],
-            defaultPrefix: "!"
-          });
-      }
+try {  
+  let settings =  
+    await GuildSettings.findOne({  
+      guildId:  
+        message.guild.id  
+    });  
 
-      const savedPrefixes =
-        Array.isArray(settings.prefixes) &&
-        settings.prefixes.length
-          ? settings.prefixes
-          : [
-              settings.defaultPrefix ||
-                settings.prefix ||
-                "!"
-            ];
+  if (!settings) {  
+    settings =  
+      await GuildSettings.create({  
+        guildId:  
+          message.guild.id,  
 
-      const prefixes = [
-        ...new Set(savedPrefixes)
-      ]
-        .filter(
-          prefix =>
-            typeof prefix === "string"
-        )
-        .map(prefix => prefix.trim())
-        .filter(Boolean)
-        .sort(
-          (first, second) =>
-            second.length - first.length
-        );
+        prefixes: ["!"],  
 
-      const usedPrefix = prefixes.find(
-        prefix =>
-          message.content.startsWith(
-            prefix
-          )
-      );
+        defaultPrefix:  
+          "!"  
+      });  
+  }  
 
-      if (!usedPrefix) {
-        return;
-      }
+  let prefixes =  
+    Array.isArray(  
+      settings.prefixes  
+    )  
+      ? settings.prefixes  
+      : [];  
 
-      const commandBody =
-        message.content
-          .slice(usedPrefix.length)
-          .trim();
+  if (  
+    !prefixes.length  
+  ) {  
+    prefixes = [  
+      settings.defaultPrefix ||  
+      settings.prefix ||  
+      "!"  
+    ];  
+  }  
 
-      if (!commandBody) {
-        return;
-      }
+  prefixes =  
+    prefixes  
+      .map(prefix =>  
+        String(prefix)  
+          .trim()  
+      )  
+      .filter(Boolean)  
+      .sort(  
+        (a, b) =>  
+          b.length -  
+          a.length  
+      );  
 
-      const args =
-        commandBody.split(/\s+/);
+  const usedPrefix =  
+    prefixes.find(prefix =>  
+      message.content  
+        .startsWith(prefix)  
+    );  
 
-      const commandName = args
-        .shift()
-        .toLowerCase();
+  if (!usedPrefix) {  
+    return;  
+  }  
 
-      const command =
-        client.prefixCommands.get(
-          commandName
-        ) ||
-        client.commands.get(commandName);
+  const content =  
+    message.content  
+      .slice(  
+        usedPrefix.length  
+      )  
+      .trim();  
 
-      if (!command) {
-        return;
-      }
+  if (!content) {  
+    return;  
+  }  
 
-      console.log(
-        `⚡ ${usedPrefix}${commandName} used by ${message.author.tag}`
-      );
+  const args =  
+    content.split(/\s+/);  
 
-      /* =====================================================
-         FAKE INTERACTION FOR PREFIX COMMANDS
-      ===================================================== */
+  const commandName =  
+    args  
+      .shift()  
+      .toLowerCase();  
 
-      const fakeInteraction = {
-        client,
+  /* BUILT-IN PING */  
 
-        commandName: command.data.name,
+  if (  
+    commandName ===  
+    "ping"  
+  ) {  
+    return message.reply(  
+      `🏓 Pong! **${client.ws.ping || 0}ms**`  
+    );  
+  }  
 
-        guild: message.guild,
-        guildId: message.guild.id,
+  /* BUILT-IN PREFIX */  
 
-        member: message.member,
-        user: message.author,
+  if (  
+    commandName ===  
+      "prefix" ||  
+    commandName ===  
+      "prefixes"  
+  ) {  
+    return message.reply(  
+      `⚙️ **RUDRA Prefixes**\n` +  
+      `${prefixes  
+        .map(  
+          prefix =>  
+            `\`${prefix}\``  
+        )  
+        .join(" ")}\n\n` +  
+      `Default: \`${  
+        settings  
+          .defaultPrefix ||  
+        prefixes[0]  
+      }\``  
+    );  
+  }  
 
-        channel: message.channel,
-        channelId: message.channel.id,
+  /* BUILT-IN HELP */  
 
-        deferred: false,
-        replied: false,
+  if (  
+    commandName ===  
+    "help"  
+  ) {  
+    const commandNames = [  
+      ...new Set(  
+        client.commands.map(  
+          command =>  
+            command.data.name  
+        )  
+      )  
+    ].sort();  
 
-        options: {
-          getUser: () =>
-            message.mentions.users.first(),
+    const visibleCommands =  
+      commandNames  
+        .slice(0, 40)  
+        .map(  
+          name =>  
+            `\`/${name}\``  
+        )  
+        .join(" ");  
 
-          getMember: () =>
-            message.mentions.members.first(),
+    return message.reply({  
+      content:  
+        `🛡️ **RUDRA Help**\n\n` +  
 
-          getString: () =>
-            args.slice(1).join(" "),
+        `**Server prefixes:** ${prefixes  
+          .map(  
+            prefix =>  
+              `\`${prefix}\``  
+          )  
+          .join(" ")}\n\n` +  
 
-          getInteger: () =>
-            Number(args[1]),
+        `**Slash commands:**\n${visibleCommands}\n\n` +  
 
-          getNumber: () =>
-            Number(args[1]),
+        "Use `/help` for the complete help menu."  
+    });  
+  }  
 
-          getBoolean: () => false,
+  const command =  
+    client.prefixCommands.get(  
+      commandName  
+    );  
 
-          getChannel: () =>
-            message.mentions.channels.first(),
+  if (!command) {  
+    return message.reply(  
+      `❌ Prefix command \`${commandName}\` not found.`  
+    );  
+  }  
 
-          getRole: () =>
-            message.mentions.roles.first(),
+  await command.prefixExecute({  
+    message,  
 
-          getMentionable: () =>
-            message.mentions.members.first() ||
-            message.mentions.roles.first(),
+    args,  
 
-          getSubcommand: () => args[0]
-        },
+    client,  
 
-        reply: async data => {
-          fakeInteraction.replied = true;
+    prefix:  
+      usedPrefix,  
 
-          return message.reply(data);
-        },
+    settings  
+  });  
+} catch (error) {  
+  console.error(  
+    "❌ Prefix command error:",  
+    error  
+  );  
 
-        deferReply: async () => {
-          fakeInteraction.deferred = true;
-        },
+  await message  
+    .reply(  
+      "❌ Prefix command failed."  
+    )  
+    .catch(() => {});  
+}
 
-        editReply: async data => {
-          fakeInteraction.replied = true;
-
-          return message.reply(data);
-        },
-
-        followUp: async data => {
-          return message.reply(data);
-        }
-      };
-
-      if (
-        typeof command.prefixExecute ===
-        "function"
-      ) {
-        await command.prefixExecute({
-          message,
-          args,
-          client,
-          prefix: usedPrefix,
-          settings
-        });
-      } else if (
-        typeof command.execute ===
-        "function"
-      ) {
-        await command.execute(
-          fakeInteraction,
-          client
-        );
-      }
-    } catch (error) {
-      console.error(
-        "❌ Prefix command error:",
-        error
-      );
-
-      await message
-        .reply(
-          "❌ There was an error while running this command."
-        )
-        .catch(() => null);
-    }
-  }
+}
 );
 
 /* =========================================================
-   START RUDRA ONCE
+PROCESS ERRORS
 ========================================================= */
 
-let httpServer = null;
+process.on(
+"unhandledRejection",
+
+error => {
+console.error(
+"❌ Unhandled rejection:",
+error
+);
+}
+);
+
+process.on(
+"uncaughtException",
+
+error => {
+console.error(
+"❌ Uncaught exception:",
+error
+);
+}
+);
+
+/* =========================================================
+START RUDRA
+========================================================= */
 
 async function startRudra() {
-  const requiredVariables = [
-    "TOKEN",
-    "CLIENT_ID",
-    "MONGODB_URI",
-    "SESSION_SECRET",
-    "CLIENT_SECRET",
-    "REDIRECT_URI"
-  ];
-
-  const missingVariables =
-    requiredVariables.filter(
-      variable =>
-        !process.env[variable]
-    );
-
-  if (missingVariables.length) {
-    throw new Error(
-      `Missing environment variables: ${missingVariables.join(
-        ", "
-      )}`
-    );
-  }
-
-  await connectDatabase();
-
-  await client.login(
-    process.env.TOKEN
-  );
-
-  httpServer = app.listen(
-    PORT,
-    "0.0.0.0",
-    () => {
-      console.log(
-        `✅ Rudra backend running on port ${PORT}`
-      );
-    }
-  );
+try {
+if (
+!process.env.TOKEN
+) {
+throw new Error(
+"TOKEN is missing"
+);
 }
 
-startRudra().catch(error => {
-  console.error(
-    "❌ Rudra failed to start:",
-    error
-  );
+if (  
+  !process.env.CLIENT_ID  
+) {  
+  throw new Error(  
+    "CLIENT_ID is missing"  
+  );  
+}  
 
-  process.exit(1);
-});
+if (  
+  !process.env.MONGODB_URI  
+) {  
+  throw new Error(  
+    "MONGODB_URI is missing"  
+  );  
+}  
 
-/* =========================================================
-   PROCESS ERROR HANDLERS
-========================================================= */
+await mongoose.connect(  
+  process.env.MONGODB_URI  
+);  
 
-process.on(
-  "unhandledRejection",
-  error => {
-    console.error(
-      "❌ Unhandled promise rejection:",
-      error
-    );
-  }
+console.log(  
+  "✅ MongoDB Connected"  
+);  
+
+app.listen(  
+  PORT,  
+
+  () => {  
+    console.log(  
+      `🚀 RUDRA server running on port ${PORT}`  
+    );  
+  }  
+);  
+
+await client.login(  
+  process.env.TOKEN  
 );
 
-process.on(
-  "uncaughtException",
-  error => {
-    console.error(
-      "❌ Uncaught exception:",
-      error
-    );
-  }
+} catch (error) {
+console.error(
+"❌ RUDRA startup failed:",
+error
 );
 
-async function shutdown(signal) {
-  console.log(
-    `⚠️ ${signal} received. Shutting down...`
-  );
+process.exit(1);
 
-  if (httpServer) {
-    await new Promise(resolve =>
-      httpServer.close(resolve)
-    );
-  }
-
-  client.destroy();
-
-  await mongoose.connection
-    .close()
-    .catch(() => null);
-
-  process.exit(0);
+}
 }
 
-process.once("SIGTERM", () =>
-  shutdown("SIGTERM")
-);
-
-process.once("SIGINT", () =>
-  shutdown("SIGINT")
-);
+startRudra();
