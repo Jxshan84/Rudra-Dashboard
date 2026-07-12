@@ -241,78 +241,28 @@ function loadCommands(directory) {
       const command =
         require(fullPath);
 
-      if (
-        !command.data ||
-        typeof command.execute !==
-          "function"
-      ) {
-        console.log(
-          `⚠️ Invalid command skipped: ${fullPath}`
-        );
+      client.prefixCommands.set(
+  commandName.toLowerCase(),
+  command
+);
 
-        continue;
-      }
+if (
+  Array.isArray(
+    command.aliases
+  )
+) {
+  for (
+    const alias
+    of command.aliases
+  ) {
+    client.prefixCommands.set(
+      String(alias)
+        .toLowerCase(),
 
-      const commandName =
-        command.data.name;
-
-      if (!commandName) {
-        console.log(
-          `⚠️ Command without name skipped: ${fullPath}`
-        );
-
-        continue;
-      }
-
-      if (
-        client.commands.has(
-          commandName
-        )
-      ) {
-        console.log(
-          `⚠️ Duplicate command skipped: ${commandName}`
-        );
-
-        continue;
-      }
-
-      client.commands.set(
-        commandName,
-        command
-      );
-
-      slashCommandMap.set(
-        commandName,
-        command.data.toJSON()
-      );
-
-      if (
-        typeof command.prefixExecute ===
-        "function"
-      ) {
-        client.prefixCommands.set(
-          commandName.toLowerCase(),
-          command
-        );
-
-        if (
-          Array.isArray(
-            command.aliases
-          )
-        ) {
-          for (
-            const alias
-            of command.aliases
-          ) {
-            client.prefixCommands.set(
-              String(alias)
-                .toLowerCase(),
-
-              command
-            );
-          }
-        }
-      }
+      command
+    );
+  }
+}
 
       console.log(
         `✅ Loaded command: ${commandName}`
