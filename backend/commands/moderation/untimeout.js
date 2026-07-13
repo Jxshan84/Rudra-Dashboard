@@ -20,57 +20,85 @@ module.exports = {
         .setDescription("Reason")
         .setRequired(false)
     )
-    .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers),
+    .setDefaultMemberPermissions(
+      PermissionFlagsBits.ModerateMembers
+    ),
 
   async execute(interaction) {
 
-    const target = interaction.options.getUser("user");
-    const reason =
-      interaction.options.getString("reason") || "No reason provided";
+    await interaction.deferReply();
 
-    const member = await interaction.guild.members
-      .fetch(target.id)
-      .catch(() => null);
+    const target =
+      interaction.options.getUser(
+        "user"
+      );
+
+    const reason =
+      interaction.options.getString(
+        "reason"
+      ) || "No reason provided";
+
+    const member =
+      await interaction.guild.members
+        .fetch(target.id)
+        .catch(() => null);
 
     if (!member) {
-      return interaction.reply({
-        content: "❌ User not found.",
-        ephemeral: true
+      return interaction.editReply({
+        content:
+          "❌ User not found."
       });
     }
 
     if (!member.moderatable) {
-      return interaction.reply({
-        content: "❌ I cannot remove this timeout.",
-        ephemeral: true
+      return interaction.editReply({
+        content:
+          "❌ I cannot remove timeout from this member."
       });
     }
 
-    await member.timeout(null, reason);
+    if (
+      !member.communicationDisabledUntil
+    ) {
+      return interaction.editReply({
+        content:
+          "❌ This member is not timed out."
+      });
+    }
 
-    const embed = new EmbedBuilder()
-      .setColor("Green")
-      .setTitle("✅ Timeout Removed")
-      .addFields(
-        {
-          name: "User",
-          value: target.tag,
-          inline: true
-        },
-        {
-          name: "Moderator",
-          value: interaction.user.tag,
-          inline: true
-        },
-        {
-          name: "Reason",
-          value: reason
-        }
-      )
-      .setTimestamp();
+    await member.timeout(
+      null,
+      reason
+    );
 
-    await interaction.reply({
+    const embed =
+      new EmbedBuilder()
+        .setColor("Green")
+        .setTitle(
+          "🔓 Timeout Removed"
+        )
+        .addFields(
+          {
+            name: "User",
+            value: target.tag,
+            inline: true
+          },
+          {
+            name: "Moderator",
+            value:
+              interaction.user.tag,
+            inline: true
+          },
+          {
+            name: "Reason",
+            value: reason
+          }
+        )
+        .setTimestamp();
+
+    await interaction.editReply({
       embeds: [embed]
     });
+
   }
 };
