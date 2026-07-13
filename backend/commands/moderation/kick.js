@@ -17,29 +17,39 @@ module.exports = {
     .addStringOption(option =>
       option
         .setName("reason")
-        .setDescription("Reason for kick")
+        .setDescription("Reason")
         .setRequired(false)
     )
-    .setDefaultMemberPermissions(PermissionFlagsBits.KickMembers),
+    .setDefaultMemberPermissions(
+      PermissionFlagsBits.KickMembers
+    ),
 
   async execute(interaction) {
-    const target = interaction.options.getUser("user");
-    const reason =
-      interaction.options.getString("reason") || "No reason provided";
 
-    const member = await interaction.guild.members.fetch(target.id).catch(() => null);
+    await interaction.deferReply();
+
+    const target =
+      interaction.options.getUser("user");
+
+    const reason =
+      interaction.options.getString("reason") ||
+      "No reason provided";
+
+    const member =
+      await interaction.guild.members
+        .fetch(target.id)
+        .catch(() => null);
 
     if (!member) {
-      return interaction.reply({
-        content: "❌ User not found.",
-        ephemeral: true
+      return interaction.editReply({
+        content: "❌ User not found."
       });
     }
 
     if (!member.kickable) {
-      return interaction.reply({
-        content: "❌ I cannot kick this member.",
-        ephemeral: true
+      return interaction.editReply({
+        content:
+          "❌ I cannot kick this member."
       });
     }
 
@@ -66,7 +76,7 @@ module.exports = {
       )
       .setTimestamp();
 
-    await interaction.reply({
+    await interaction.editReply({
       embeds: [embed]
     });
   }
