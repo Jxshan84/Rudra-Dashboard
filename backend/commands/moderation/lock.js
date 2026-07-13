@@ -1,27 +1,46 @@
 const {
   SlashCommandBuilder,
   PermissionFlagsBits,
+  ChannelType,
   EmbedBuilder
 } = require("discord.js");
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("lock")
-    .setDescription("Lock the current channel.")
+    .setDescription("Lock a channel")
+    .addChannelOption(option =>
+      option
+        .setName("channel")
+        .setDescription("Channel to lock")
+        .addChannelTypes(
+          ChannelType.GuildText
+        )
+        .setRequired(false)
+    )
     .addStringOption(option =>
       option
         .setName("reason")
-        .setDescription("Reason for locking")
+        .setDescription("Reason")
         .setRequired(false)
     )
-    .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels),
+    .setDefaultMemberPermissions(
+      PermissionFlagsBits.ManageChannels
+    ),
 
   async execute(interaction) {
 
-    const reason =
-      interaction.options.getString("reason") || "No reason provided.";
+    await interaction.deferReply();
 
-    const channel = interaction.channel;
+    const channel =
+      interaction.options.getChannel(
+        "channel"
+      ) || interaction.channel;
+
+    const reason =
+      interaction.options.getString(
+        "reason"
+      ) || "No reason provided";
 
     await channel.permissionOverwrites.edit(
       interaction.guild.roles.everyone,
@@ -33,8 +52,12 @@ module.exports = {
     const embed = new EmbedBuilder()
       .setColor("Red")
       .setTitle("🔒 Channel Locked")
-      .setDescription(`${channel} has been locked.`)
       .addFields(
+        {
+          name: "Channel",
+          value: `<#${channel.id}>`,
+          inline: true
+        },
         {
           name: "Moderator",
           value: interaction.user.tag,
@@ -42,13 +65,12 @@ module.exports = {
         },
         {
           name: "Reason",
-          value: reason,
-          inline: true
+          value: reason
         }
       )
       .setTimestamp();
 
-    await interaction.reply({
+    await interaction.editReply({
       embeds: [embed]
     });
 
