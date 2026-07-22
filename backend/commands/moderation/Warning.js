@@ -16,46 +16,48 @@ module.exports = {
         .setDescription("User")
         .setRequired(true)
     )
-    .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers),
+    .setDefaultMemberPermissions(
+      PermissionFlagsBits.ModerateMembers
+    ),
 
- async execute(interaction) {
+  async execute(interaction) {
+    await interaction.deferReply();
 
-  await interaction.deferReply();
+    const target =
+      interaction.options.getUser("user");
 
-  const target =
-    interaction.options.getUser("user");
+    const warns = await Warn.find({
+      guildId: interaction.guild.id,
+      userId: target.id
+    });
 
-  const warns = await Warn.find({
-    guildId: interaction.guild.id,
-    userId: target.id
-  });
+    if (!warns.length) {
+      return interaction.editReply({
+        content:
+          "✅ This user has no warnings."
+      });
+    }
 
-  if (!warns.length) {
-    return interaction.editReply({
-      content:
-        "✅ This user has no warnings."
+    const description = warns
+      .map(
+        (warn, index) =>
+          `**${index + 1}.** ${warn.reason}\n👮 <@${warn.moderatorId}>`
+      )
+      .join("\n\n");
+
+    const embed = new EmbedBuilder()
+      .setColor("Orange")
+      .setTitle(
+        `⚠️ Warnings • ${target.tag}`
+      )
+      .setDescription(description)
+      .setFooter({
+        text: `Total Warnings: ${warns.length}`
+      })
+      .setTimestamp();
+
+    await interaction.editReply({
+      embeds: [embed]
     });
   }
-
-  const description = warns
-    .map(
-      (warn, index) =>
-        `**${index + 1}.** ${warn.reason}\n👮 <@${warn.moderatorId}>`
-    )
-    .join("\n\n");
-
-  const embed = new EmbedBuilder()
-    .setColor("Orange")
-    .setTitle(
-      `⚠️ Warnings • ${target.tag}`
-    )
-    .setDescription(description)
-    .setFooter({
-      text: `Total Warnings: ${warns.length}`
-    })
-    .setTimestamp();
-
-  await interaction.editReply({
-    embeds: [embed]
-  });
-}
+};
